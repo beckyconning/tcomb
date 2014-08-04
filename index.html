@@ -45,7 +45,7 @@
 </ul><h2>
 <a name="how" class="anchor" href="#how"><span class="octicon octicon-link"></span></a>How</h2>
 
-<p>This library provides several type combinators and a built-in <code>assert</code> function you can use. When an assertion fails in the browser this function starts the debugger so you can inspect the stack and find what's wrong. Since after a type error many others are expected, the debugger starts only once.</p>
+<p>This library provides several type combinators and a built-in <code>assert</code> function you can use. When an assertion fails in the browser this function starts the debugger so you can inspect the stack and find what's wrong. The debugger starts only once after the first failed assert.</p>
 
 <h2>
 <a name="quick-example" class="anchor" href="#quick-example"><span class="octicon octicon-link"></span></a>Quick example</h2>
@@ -160,14 +160,14 @@ Object#keys()
 
 <ol>
 <li>
-<code>T</code> has signature <code>T(values, [mut])</code> where the arg <code>values</code> is the set of values occurred to have an instance of <code>T</code> (depends on the nature of <code>T</code>) and the optional boolean arg <code>mut</code> makes the instance mutable (default <code>false</code>)</li>
+<code>T</code> has signature <code>T(values, [mut])</code> where <code>values</code> depends on the nature of <code>T</code> and the optional boolean arg <code>mut</code> makes the instance mutable (default <code>false</code>)</li>
 <li>
 <code>T</code> is idempotent: <code>new T(new T(values)) "equals" new T(values)</code>
 </li>
 <li>
 <code>T</code> owns a static function <code>T.is(x)</code> returning <code>true</code> if <code>x</code> is a instance of <code>T</code>
 </li>
-</ol><p><strong>Note</strong>: 2. implies that <code>T</code> can be used as the default JSON decoder</p>
+</ol><p><strong>Note</strong>: 2. implies that <code>T</code> can be used as a default JSON decoder</p>
 
 <h2>
 <a name="api" class="anchor" href="#api"><span class="octicon octicon-link"></span></a>Api</h2>
@@ -175,7 +175,7 @@ Object#keys()
 <h3>
 <a name="primitivename-is" class="anchor" href="#primitivename-is"><span class="octicon octicon-link"></span></a>primitive(name, is)</h3>
 
-<p>Is used internally to define JavaScript native types:</p>
+<p>Used internally to define JavaScript native types:</p>
 
 <ul>
 <li>Nil: <code>null</code> and  <code>undefined</code>
@@ -302,7 +302,7 @@ var shape = new Shape({center: {x: 1, y: 2}, radius: 10});
 
 <p>is(x)</p>
 
-<p>Restituisce <code>true</code> se <code>x</code> appartiene all'unione.</p>
+<p>Returns <code>true</code> if <code>x</code> belongs to the union.</p>
 
 <pre><code>Shape.is(new Circle([p, 10])); // =&gt; true
 </code></pre>
@@ -310,7 +310,7 @@ var shape = new Shape({center: {x: 1, y: 2}, radius: 10});
 <h3>
 <a name="maybetype-name" class="anchor" href="#maybetype-name"><span class="octicon octicon-link"></span></a>maybe(type, [name])</h3>
 
-<p>Analogo ad una <code>union</code> con <code>Nil</code> e <code>type</code>.</p>
+<p>Same as <code>union([Nil, type])</code>.</p>
 
 <pre><code>var MaybeStr = maybe(Str);
 
@@ -331,7 +331,7 @@ MaybeStr.is(1);       // =&gt; false
 <h3>
 <a name="enumsmap-name" class="anchor" href="#enumsmap-name"><span class="octicon octicon-link"></span></a>enums(map, [name])</h3>
 
-<p>Definisce una enumerazione (di stringhe).</p>
+<p>Defines an enum of strings.</p>
 
 <pre><code>var Direction = enums({
     North: 0, 
@@ -352,7 +352,7 @@ MaybeStr.is(1);       // =&gt; false
 
 <p>is(x)</p>
 
-<p>Restituisce <code>true</code> se <code>x</code> appartiene dell'enum.</p>
+<p>Returns <code>true</code> if <code>x</code> belongs to the enum.</p>
 
 <pre><code>Direction.is('North'); // =&gt; true
 </code></pre>
@@ -360,7 +360,7 @@ MaybeStr.is(1);       // =&gt; false
 <h3>
 <a name="tupletypes-name" class="anchor" href="#tupletypes-name"><span class="octicon octicon-link"></span></a>tuple(types, [name])</h3>
 
-<p>Definisce un array di dimensione fissa le cui coordinate hanno i tipi specificati.</p>
+<p>Defines a tuple whose coordinates have the specified types.</p>
 
 <pre><code>var Args = tuple([Num, Num]);
 
@@ -378,16 +378,16 @@ var a = new Args([1, 2]);
 
 <p>is(x)</p>
 
-<p>Restituisce <code>true</code> se <code>x</code> è una tupla corretta.</p>
+<p>Returns <code>true</code> if <code>x</code> belongs to the tuple.</p>
 
 <pre><code>Args.is([1, 2]);      // =&gt; true
-Args.is([1, 'a']);    // =&gt; false, il secondo elemento non è un Num
-Args.is([1, 2, 3]);   // =&gt; false, troppi elementi
+Args.is([1, 'a']);    // =&gt; false, second element is not a Num
+Args.is([1, 2, 3]);   // =&gt; false, too many elements
 </code></pre>
 
 <p>update(instance, index, element, [mut])</p>
 
-<p>Restituisce un'istanza con le nuove proprietà senza modificare l'istanza originale.</p>
+<p>Returns an instance without modifying the original.</p>
 
 <pre><code>Args.update(a, 0, 2);    // =&gt; [2, 2]
 </code></pre>
@@ -395,18 +395,18 @@ Args.is([1, 2, 3]);   // =&gt; false, troppi elementi
 <h3>
 <a name="subtypetype-predicate-name" class="anchor" href="#subtypetype-predicate-name"><span class="octicon octicon-link"></span></a>subtype(type, predicate, [name])</h3>
 
-<p>Definisce un sottotipo di un tipo già definito.</p>
+<p>Defines a subtype of an existing type.</p>
 
 <pre><code>var Int = subtype(Num, function (n) {
     return n === parseInt(n, 10);
 });
 
+// points of the first quadrant
 var Q1Point = subtype(Point, function (p) {
-    // punti nel primo quadrante
     return p.x &gt;= 0 &amp;&amp; p.y &gt;= 0;
 });
 
-// uso del costruttore
+// constructor usage
 var p = new Q1Point({x: -1, y: -2}); // =&gt; fail!
 </code></pre>
 
@@ -422,7 +422,7 @@ var p = new Q1Point({x: -1, y: -2}); // =&gt; fail!
 
 <p>is(x)</p>
 
-<p>Restituisce <code>true</code> se <code>x</code> è un'istanza corretta.</p>
+<p>Returns <code>true</code> if <code>x</code> belongs to the subtype.</p>
 
 <pre><code>Int.is(2);      // =&gt; true
 Int.is(1.1);    // =&gt; false
@@ -431,11 +431,11 @@ Int.is(1.1);    // =&gt; false
 <h3>
 <a name="listtype-name" class="anchor" href="#listtype-name"><span class="octicon octicon-link"></span></a>list(type, [name])</h3>
 
-<p>Definisce un array i cui elementi sono del tipo <code>type</code>.</p>
+<p>Defines an array where all elements are of type <code>type</code>.</p>
 
 <pre><code>var Path = list(Point);
 
-// uso del costruttore
+// costructor usage
 var path = new Path([
     {x: 0, y: 0}, 
     {x: 1, y: 1}
@@ -451,9 +451,16 @@ var path = new Path([
 };
 </code></pre>
 
+<p>is(x)</p>
+
+<p>Returns <code>true</code> if <code>x</code> belongs to the list.</p>
+
+<pre><code>Path.is([{x: 0, y: 0}, {x: 1, y: 1}]);      // =&gt; true
+</code></pre>
+
 <p><strong>Useful methods</strong></p>
 
-<p>Restituiscono un'istanza con le nuove proprietà senza modificare l'istanza originale.</p>
+<p>Return an instance without modifying the original.</p>
 
 <pre><code>Path.append(path, element, [mut]);
 Path.prepend(path, element, [mut]);
@@ -465,24 +472,18 @@ Path.move(path, from, to, [mut]);
 <h3>
 <a name="utils" class="anchor" href="#utils"><span class="octicon octicon-link"></span></a>Utils</h3>
 
-<pre><code>// fa partire il debugger prima di lanciare un errore
-// il debugger parte una volta sola perchè tipicamente dopo un fallimento 
-// ce ne possono essere molti altri e diventerebbe una noia
-fail(message)
+<pre><code>fail(message)
 
-// se l'assert fallisce chiama fail(message)
 assert(guard, [message])
 
-// rende immutabili le proprietà dirette di un oggetto o un array 
-// a meno che unless sia = true
+// make properties immutables unless `unless` is `true`
 freeze(obj_or_arr, [unless])
 
-// copia i campi di y in x. Se overwrite è falsy non è possibile
-// sovrascrivere dei campi già presenti in x in modo da evitare
-// fastidiosi bug
+// adds the properties of `y` to `x`. If `overwrite` is falsy
+// and a property already exists, throws an error
 mixin(x, y, [overwrite])
 
-// manipolazione degli array
+// array manipulation
 append(arr, element);
 prepend(arr, element);
 update(arr, index, element);
