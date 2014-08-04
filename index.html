@@ -29,17 +29,83 @@
       </header>
       <section>
         <h1>
-<a name="prerequisiti" class="anchor" href="#prerequisiti"><span class="octicon octicon-link"></span></a>Prerequisiti</h1>
+<a name="tcomb" class="anchor" href="#tcomb"><span class="octicon octicon-link"></span></a>tcomb</h1>
 
-<pre><code>array.forEach()
-array.map()
-array.some()
-array.every()
-Object.freeze()
-Object.keys()
+<p>JavaScript types and combinators</p>
+
+<h2>
+<a name="why" class="anchor" href="#why"><span class="octicon octicon-link"></span></a>Why?</h2>
+
+<p>tcomb is a library which allows you to check the types of JavaScript values at runtime with a simple syntax. It is great for checking external input, for testing and for adding safety to your internal code. Bonus points: </p>
+
+<ul>
+<li>easy debugging</li>
+<li>encode/decode of your domain objects to/from JSON for free</li>
+<li>instances are immutables by default</li>
+</ul><h2>
+<a name="how" class="anchor" href="#how"><span class="octicon octicon-link"></span></a>How</h2>
+
+<p>This library provides several type combinators and a built-in <code>assert</code> function you can use. When an assertion fails in the browser this function starts the debugger so you can inspect the stack and find what's wrong. Since after a type error many others are expected, the debugger starts only once.</p>
+
+<h2>
+<a name="quick-example" class="anchor" href="#quick-example"><span class="octicon octicon-link"></span></a>Quick example</h2>
+
+<p>Let's build a product</p>
+
+<pre><code>var Product = struct({
+    name: Str,                  // a REQUIRED string
+    description: maybe(Str),    // an OPTIONAL string (can be `null`)
+    homepage: Url,              // a SUBTYPE string representing a URL
+    shippings: list(Shipping),  // a LIST of shipping methods
+    category: Category,         // a string in [Audio, Video] (ENUM)
+    price: union(Num, Price),   // price expressed in dollars OR in another currency (UNION)
+    dim: tuple([Num, Num])      // width x height (TUPLE)
+});
+
+var Url = subtype(Str, function (s) {
+    return s.indexOf('http://') === 0;
+});
+
+var Shipping = struct({
+    description: Str,
+    cost: Num
+});
+
+var Category = enums({
+    Audio: 0,
+    Video: 1
+});
+
+var Price = struct({
+    currency: Str,
+    amount: Num
+});
+
+var ipod = new Product({
+    name: 'iPod',
+    description: 'Engineered for maximum funness.',
+    homepage: 'http://www.apple.com/ipod/',
+    shippings: [{
+        description: 'Shipped to your door, free.',
+        cost: 0
+    }],
+    category: 'Audio',
+    price: {currency: 'EUR', amount: 100},
+    dim: [2.4, 4.1]
+});
 </code></pre>
 
-<p>Setup di riferimento</p>
+<h2>
+<a name="setup" class="anchor" href="#setup"><span class="octicon octicon-link"></span></a>Setup</h2>
+
+<p>Node</p>
+
+<pre><code>npm install tcomb
+
+var t = require('tcomb');
+</code></pre>
+
+<p>Browser</p>
 
 <pre><code>&lt;!DOCTYPE html&gt;
 &lt;html&gt;
@@ -47,75 +113,123 @@ Object.keys()
         &lt;meta charset="utf-8" /&gt;
         &lt;meta http-equiv="X-UA-Compatible" content="IE=edge"&gt;
         &lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;
-        &lt;title&gt;gpr&lt;/title&gt;
+        &lt;title&gt;tcomb setup&lt;/title&gt;
         &lt;!--[if lt IE 9]&gt;
         &lt;script src="shims/json2.js"&gt;&lt;/script&gt;
         &lt;script src="shims/es5-shim.min.js"&gt;&lt;/script&gt;
         &lt;script src="shims/es5-sham.min.js"&gt;&lt;/script&gt;
         &lt;script src="shims/html5shiv.min.js"&gt;&lt;/script&gt;
         &lt;![endif]--&gt;
-        &lt;script type="text/javascript" src="jquery.js"&gt;&lt;/script&gt;
-        &lt;script type="text/javascript" src="gpr.js"&gt;&lt;/script&gt;
+        &lt;script type="text/javascript" src="tcomb.js"&gt;&lt;/script&gt;
     &lt;/head&gt;
     &lt;body&gt;
         &lt;script type="text/javascript"&gt;
+            console.log(t);
         &lt;/script&gt;
     &lt;/body&gt;
 &lt;/html&gt;
 </code></pre>
 
-<h1>
-<a name="come-sono-fatti-i-tipi" class="anchor" href="#come-sono-fatti-i-tipi"><span class="octicon octicon-link"></span></a>Come sono fatti i tipi?</h1>
+<h2>
+<a name="requirements" class="anchor" href="#requirements"><span class="octicon octicon-link"></span></a>Requirements</h2>
 
-<p>Una funzione <code>T</code> è un tipo se</p>
+<p>Some ES5 methods</p>
+
+<pre><code>Array#forEach()
+Array#map()
+Array#some()
+Array#every()
+Object#freeze()
+Object#keys()
+</code></pre>
+
+<h2>
+<a name="tests" class="anchor" href="#tests"><span class="octicon octicon-link"></span></a>Tests</h2>
+
+<p>Run</p>
+
+<pre><code>mocha
+</code></pre>
+
+<p>on the project root.</p>
+
+<h2>
+<a name="whats-a-type" class="anchor" href="#whats-a-type"><span class="octicon octicon-link"></span></a>What's a type?</h2>
+
+<p>A <code>type</code> is a function <code>T</code> such that</p>
 
 <ol>
-<li>ha firma <code>T(values, [mut])</code> ove <code>values</code> è l'insieme di valori che occorrono per avere un'istanza di <code>T</code> (dipende da <code>T</code>) e <code>mut</code> indica se l'istanza è mutabile (default <code>false</code>)</li>
-<li>è strutturalmente idempotente: <code>new T(new T(values)) equals new T(values)</code>
+<li>
+<code>T</code> has signature <code>T(values, [mut])</code> where the arg <code>values</code> is the set of values occurred to have an instance of <code>T</code> (depends on the nature of <code>T</code>) and the optional boolean arg <code>mut</code> makes the instance mutable (default <code>false</code>)</li>
+<li>
+<code>T</code> is idempotent: <code>new T(new T(values)) "equals" new T(values)</code>
 </li>
-<li>possiede una funzione statica <code>T.is(x)</code> che restituisce <code>true</code> se <code>x</code> è un'istanza di <code>T</code>
+<li>
+<code>T</code> owns a static function <code>T.is(x)</code> returning <code>true</code> if <code>x</code> is a instance of <code>T</code>
 </li>
-</ol><p>da 2. deriva che <code>T</code> può essere usato come deserializzatore JSON di default</p>
+</ol><p><strong>Note</strong>: 2. implies that <code>T</code> can be used as the default JSON decoder</p>
 
-<h1>
-<a name="primitivename-is" class="anchor" href="#primitivename-is"><span class="octicon octicon-link"></span></a>primitive(name, is)</h1>
+<h2>
+<a name="api" class="anchor" href="#api"><span class="octicon octicon-link"></span></a>Api</h2>
+
+<h3>
+<a name="primitivename-is" class="anchor" href="#primitivename-is"><span class="octicon octicon-link"></span></a>primitive(name, is)</h3>
+
+<p>Is used internally to define JavaScript native types:</p>
 
 <ul>
-<li>Nil</li>
-<li>Str</li>
-<li>Num</li>
-<li>Bool</li>
-<li>Arr</li>
-<li>Obj</li>
-<li>Func</li>
-</ul><h1>
-<a name="structprops-name" class="anchor" href="#structprops-name"><span class="octicon octicon-link"></span></a>struct(props, [name])</h1>
+<li>Nil: <code>null</code> and  <code>undefined</code>
+</li>
+<li>Str: strings</li>
+<li>Num: numbers</li>
+<li>Bool: booleans</li>
+<li>Arr: arrays</li>
+<li>Obj: plain objects</li>
+<li>Func: functions</li>
+<li>Err: errors</li>
+</ul><p>Example</p>
 
-<p>L'opzione <code>name</code> è utile per facilitare il debug.</p>
+<pre><code>Str.is('a'); // =&gt; true
+Nil.is(0); // =&gt; false
+</code></pre>
 
-<pre><code>var Point = struct({
+<h3>
+<a name="structprops-name" class="anchor" href="#structprops-name"><span class="octicon octicon-link"></span></a>struct(props, [name])</h3>
+
+<p>Defines a struct like type.</p>
+
+<ul>
+<li>
+<code>props</code> hash field name -&gt; type</li>
+<li>
+<code>name</code> optional string useful for debugging</li>
+</ul><p>Example</p>
+
+<pre><code>// define a struct with two numerical props
+var Point = struct({
     x: Num,
     y: Num
 });
+</code></pre>
 
-// i metodi vengono definiti normalmente
-Point.prototype.toString = function () {
+<p>Methods are defined as usual</p>
+
+<pre><code>Point.prototype.toString = function () {
     return '(' + this.x + ', ' + this.y + ')';
 };
 </code></pre>
 
-<p>Come istanziare una struct</p>
+<p>Building an instance is simple as</p>
 
-<pre><code>'use strict';
-
+<pre><code>"use strict";
 var p = new Point({x: 1, y: 2});
-p.x = 2; // =&gt; TypeError, p è immutabile
+p.x = 2; // =&gt; TypeError, p is immutable
 
-p = new Point({x: 1, y: 2}, true);
-p.x = 2; // ok, p ora è mutabile
+p = new Point({x: 1, y: 2}, true); // now p is mutable
+p.x = 2; // ok
 </code></pre>
 
-<p>Alcune meta informazioni</p>
+<p>Some meta informations are stored in a <code>meta</code> hash</p>
 
 <pre><code>Point.meta = {
     kind: 'struct',
@@ -124,26 +238,31 @@ p.x = 2; // ok, p ora è mutabile
 };
 </code></pre>
 
-<h3>
-<a name="isx" class="anchor" href="#isx"><span class="octicon octicon-link"></span></a>is(x)</h3>
+<p>is(x)</p>
 
-<p>Restituisce <code>true</code> se <code>x</code> è un'istanza della struct.</p>
+<p>Returns <code>true</code> if <code>x</code> is an instance of <code>Point</code>.</p>
 
 <pre><code>Point.is(p); // =&gt; true
 </code></pre>
 
-<h3>
-<a name="updateinstance-updates-mut" class="anchor" href="#updateinstance-updates-mut"><span class="octicon octicon-link"></span></a>update(instance, updates, [mut])</h3>
+<p>update(instance, updates, [mut])</p>
 
-<p>Restituisce un'istanza con le nuove proprietà senza modificare l'istanza originale.</p>
+<p>Returns an instance with changed props, without modify the original.</p>
 
 <pre><code>Point.update(p, {x: 3}); // =&gt; new Point({x: 3, y: 2})
 </code></pre>
 
-<h1>
-<a name="uniontypes-name" class="anchor" href="#uniontypes-name"><span class="octicon octicon-link"></span></a>union(types, [name])</h1>
+<h3>
+<a name="uniontypes-name" class="anchor" href="#uniontypes-name"><span class="octicon octicon-link"></span></a>union(types, [name])</h3>
 
-<p>Definisce un'unione di tipi.</p>
+<p>Defines a types union.</p>
+
+<ul>
+<li>
+<code>types</code> array of types</li>
+<li>
+<code>name</code> optional string useful for debugging</li>
+</ul><p>Example</p>
 
 <pre><code>var Circle = struct({
     center: Point,
@@ -151,8 +270,8 @@ p.x = 2; // ok, p ora è mutabile
 });
 
 var Rectangle = struct({
-    a: Point,
-    b: Point
+    bl: Point, // bottom left vertex
+    tr: Point  // top right vertex
 });
 
 var Shape = union([
@@ -160,7 +279,8 @@ var Shape = union([
     Rectangle
 ]);
 
-// per poter usare Shape come costruttore occorre implementare dispatch()
+// in order to use Shape as constructor `dispatch(values) -&gt; Type` 
+// must be implemented
 Shape.dispatch = function (values) {
     assert(Obj.is(values));
     return values.hasOwnProperty('center') ?
@@ -171,7 +291,7 @@ Shape.dispatch = function (values) {
 var shape = new Shape({center: {x: 1, y: 2}, radius: 10});
 </code></pre>
 
-<p>Alcune meta informazioni</p>
+<p>Some meta informations are stored in a <code>meta</code> hash</p>
 
 <pre><code>Shape.meta = {
     kind: 'union',
@@ -180,16 +300,15 @@ var shape = new Shape({center: {x: 1, y: 2}, radius: 10});
 };
 </code></pre>
 
-<h3>
-<a name="isx-1" class="anchor" href="#isx-1"><span class="octicon octicon-link"></span></a>is(x)</h3>
+<p>is(x)</p>
 
 <p>Restituisce <code>true</code> se <code>x</code> appartiene all'unione.</p>
 
 <pre><code>Shape.is(new Circle([p, 10])); // =&gt; true
 </code></pre>
 
-<h1>
-<a name="maybetype-name" class="anchor" href="#maybetype-name"><span class="octicon octicon-link"></span></a>maybe(type, [name])</h1>
+<h3>
+<a name="maybetype-name" class="anchor" href="#maybetype-name"><span class="octicon octicon-link"></span></a>maybe(type, [name])</h3>
 
 <p>Analogo ad una <code>union</code> con <code>Nil</code> e <code>type</code>.</p>
 
@@ -200,7 +319,7 @@ MaybeStr.is(null);    // =&gt; true
 MaybeStr.is(1);       // =&gt; false
 </code></pre>
 
-<p>Alcune meta informazioni</p>
+<p>Some meta informations are stored in a <code>meta</code> hash</p>
 
 <pre><code>MaybeStr.meta = {
     kind: 'maybe',
@@ -209,8 +328,8 @@ MaybeStr.is(1);       // =&gt; false
 };
 </code></pre>
 
-<h1>
-<a name="enumsmap-name" class="anchor" href="#enumsmap-name"><span class="octicon octicon-link"></span></a>enums(map, [name])</h1>
+<h3>
+<a name="enumsmap-name" class="anchor" href="#enumsmap-name"><span class="octicon octicon-link"></span></a>enums(map, [name])</h3>
 
 <p>Definisce una enumerazione (di stringhe).</p>
 
@@ -222,7 +341,7 @@ MaybeStr.is(1);       // =&gt; false
 });
 </code></pre>
 
-<p>Alcune meta informazioni</p>
+<p>Some meta informations are stored in a <code>meta</code> hash</p>
 
 <pre><code>Direction.meta = {
     kind: 'enums',
@@ -231,16 +350,15 @@ MaybeStr.is(1);       // =&gt; false
 };
 </code></pre>
 
-<h3>
-<a name="isx-2" class="anchor" href="#isx-2"><span class="octicon octicon-link"></span></a>is(x)</h3>
+<p>is(x)</p>
 
 <p>Restituisce <code>true</code> se <code>x</code> appartiene dell'enum.</p>
 
 <pre><code>Direction.is('North'); // =&gt; true
 </code></pre>
 
-<h1>
-<a name="tupletypes-name" class="anchor" href="#tupletypes-name"><span class="octicon octicon-link"></span></a>tuple(types, [name])</h1>
+<h3>
+<a name="tupletypes-name" class="anchor" href="#tupletypes-name"><span class="octicon octicon-link"></span></a>tuple(types, [name])</h3>
 
 <p>Definisce un array di dimensione fissa le cui coordinate hanno i tipi specificati.</p>
 
@@ -249,7 +367,7 @@ MaybeStr.is(1);       // =&gt; false
 var a = new Args([1, 2]);
 </code></pre>
 
-<p>Alcune meta informazioni</p>
+<p>Some meta informations are stored in a <code>meta</code> hash</p>
 
 <pre><code>Args.meta = {
     kind: 'tuple',
@@ -258,8 +376,7 @@ var a = new Args([1, 2]);
 };
 </code></pre>
 
-<h3>
-<a name="isx-3" class="anchor" href="#isx-3"><span class="octicon octicon-link"></span></a>is(x)</h3>
+<p>is(x)</p>
 
 <p>Restituisce <code>true</code> se <code>x</code> è una tupla corretta.</p>
 
@@ -268,16 +385,15 @@ Args.is([1, 'a']);    // =&gt; false, il secondo elemento non è un Num
 Args.is([1, 2, 3]);   // =&gt; false, troppi elementi
 </code></pre>
 
-<h3>
-<a name="updateinstance-index-element-mut" class="anchor" href="#updateinstance-index-element-mut"><span class="octicon octicon-link"></span></a>update(instance, index, element, [mut])</h3>
+<p>update(instance, index, element, [mut])</p>
 
 <p>Restituisce un'istanza con le nuove proprietà senza modificare l'istanza originale.</p>
 
 <pre><code>Args.update(a, 0, 2);    // =&gt; [2, 2]
 </code></pre>
 
-<h1>
-<a name="subtypetype-predicate-name" class="anchor" href="#subtypetype-predicate-name"><span class="octicon octicon-link"></span></a>subtype(type, predicate, [name])</h1>
+<h3>
+<a name="subtypetype-predicate-name" class="anchor" href="#subtypetype-predicate-name"><span class="octicon octicon-link"></span></a>subtype(type, predicate, [name])</h3>
 
 <p>Definisce un sottotipo di un tipo già definito.</p>
 
@@ -294,7 +410,7 @@ var Q1Point = subtype(Point, function (p) {
 var p = new Q1Point({x: -1, y: -2}); // =&gt; fail!
 </code></pre>
 
-<p>Alcune meta informazioni</p>
+<p>Some meta informations are stored in a <code>meta</code> hash</p>
 
 <pre><code>Int.meta = {
     kind: 'subtype',
@@ -304,8 +420,7 @@ var p = new Q1Point({x: -1, y: -2}); // =&gt; fail!
 };
 </code></pre>
 
-<h3>
-<a name="isx-4" class="anchor" href="#isx-4"><span class="octicon octicon-link"></span></a>is(x)</h3>
+<p>is(x)</p>
 
 <p>Restituisce <code>true</code> se <code>x</code> è un'istanza corretta.</p>
 
@@ -313,8 +428,8 @@ var p = new Q1Point({x: -1, y: -2}); // =&gt; fail!
 Int.is(1.1);    // =&gt; false
 </code></pre>
 
-<h1>
-<a name="listtype-name" class="anchor" href="#listtype-name"><span class="octicon octicon-link"></span></a>list(type, [name])</h1>
+<h3>
+<a name="listtype-name" class="anchor" href="#listtype-name"><span class="octicon octicon-link"></span></a>list(type, [name])</h3>
 
 <p>Definisce un array i cui elementi sono del tipo <code>type</code>.</p>
 
@@ -327,7 +442,7 @@ var path = new Path([
 ]);
 </code></pre>
 
-<p>Alcune meta informazioni</p>
+<p>Some meta informations are stored in a <code>meta</code> hash</p>
 
 <pre><code>Path.meta = {
     kind: 'list',
@@ -336,8 +451,7 @@ var path = new Path([
 };
 </code></pre>
 
-<h3>
-<a name="metodi-utili" class="anchor" href="#metodi-utili"><span class="octicon octicon-link"></span></a>Metodi utili</h3>
+<p><strong>Useful methods</strong></p>
 
 <p>Restituiscono un'istanza con le nuove proprietà senza modificare l'istanza originale.</p>
 
@@ -348,8 +462,8 @@ Path.remove(path, index, [mut]);
 Path.move(path, from, to, [mut]);
 </code></pre>
 
-<h1>
-<a name="utils" class="anchor" href="#utils"><span class="octicon octicon-link"></span></a>Utils</h1>
+<h3>
+<a name="utils" class="anchor" href="#utils"><span class="octicon octicon-link"></span></a>Utils</h3>
 
 <pre><code>// fa partire il debugger prima di lanciare un errore
 // il debugger parte una volta sola perchè tipicamente dopo un fallimento 
@@ -376,11 +490,11 @@ remove(arr, index);
 move(arr, from, to);
 </code></pre>
 
-<h1>
-<a name="esempi-duso" class="anchor" href="#esempi-duso"><span class="octicon octicon-link"></span></a>Esempi d'uso</h1>
+<h2>
+<a name="more-examples" class="anchor" href="#more-examples"><span class="octicon octicon-link"></span></a>More examples</h2>
 
 <h3>
-<a name="come-estendere-una-struct" class="anchor" href="#come-estendere-una-struct"><span class="octicon octicon-link"></span></a>Come estendere una struct</h3>
+<a name="how-to-extend-a-struct" class="anchor" href="#how-to-extend-a-struct"><span class="octicon octicon-link"></span></a>How to extend a struct</h3>
 
 <pre><code>var Point3D = struct(mixin(Point.meta.props, {
     z: Num
@@ -390,7 +504,7 @@ var p = new Point3D({x: 1, y: 2, z: 3});
 </code></pre>
 
 <h3>
-<a name="modifica-in-profondit%C3%A0-di-una-struct" class="anchor" href="#modifica-in-profondit%C3%A0-di-una-struct"><span class="octicon octicon-link"></span></a>Modifica in profondità di una struct</h3>
+<a name="deep-update-of-a-struct" class="anchor" href="#deep-update-of-a-struct"><span class="octicon octicon-link"></span></a>Deep update of a struct</h3>
 
 <pre><code>var c = new Circle({center: {x: 1, y: 2}, radius: 10});
 
@@ -403,7 +517,7 @@ var c2 = Circle.update(c, {
 </code></pre>
 
 <h3>
-<a name="json-decoder" class="anchor" href="#json-decoder"><span class="octicon octicon-link"></span></a>JSON Decoder</h3>
+<a name="write-a-general-json-decoder" class="anchor" href="#write-a-general-json-decoder"><span class="octicon octicon-link"></span></a>Write a general JSON Decoder</h3>
 
 <pre><code>// (json, T, mut) -&gt; instance of T
 function decode(json, T, mut) {
@@ -443,8 +557,8 @@ function decode(json, T, mut) {
 };
 </code></pre>
 
-<h1>
-<a name="copyright--license" class="anchor" href="#copyright--license"><span class="octicon octicon-link"></span></a>Copyright &amp; License</h1>
+<h2>
+<a name="copyright--license" class="anchor" href="#copyright--license"><span class="octicon octicon-link"></span></a>Copyright &amp; License</h2>
 
 <p>Copyright (C) 2014 Giulio Canti - Released under the MIT License.</p>
 
