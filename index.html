@@ -36,18 +36,33 @@
 <h2>
 <a name="why" class="anchor" href="#why"><span class="octicon octicon-link"></span></a>Why?</h2>
 
-<p>tcomb is a library which allows you to check the types of JavaScript values at runtime with a simple syntax. It is great for checking external input, for testing and for adding safety to your internal code. Bonus points: </p>
+<p>tcomb is a library which allows you to <strong>check the types</strong> of JavaScript values at runtime with a <strong>simple syntax</strong>. It is great for checking external input, for testing and for adding safety to your internal code. Bonus points: </p>
 
 <ul>
 <li>easy debugging</li>
 <li>encode/decode of your domain objects to/from JSON for free</li>
-<li>instances are immutables by default</li>
+<li>
+<strong>instances are immutables</strong> by default</li>
 </ul><h2>
-<a name="how" class="anchor" href="#how"><span class="octicon octicon-link"></span></a>How</h2>
+<a name="how" class="anchor" href="#how"><span class="octicon octicon-link"></span></a>How?</h2>
 
-<p>This library provides several type combinators and a built-in <code>assert</code> function you can use. When an assertion fails in the browser this function starts the debugger so you can inspect the stack and find what's wrong. The debugger starts only once after the first failed assert.</p>
+<p>This library provides several type combinators and a built-in <code>assert</code> function you can use. When an <strong>assertion fails this library starts the debugger</strong> so you can inspect the stack and quickly find out what's wrong. The debugger starts only once after the first failed assert.</p>
 
 <h2>
+<a name="overview" class="anchor" href="#overview"><span class="octicon octicon-link"></span></a>Overview</h2>
+
+<p>You can define and check:</p>
+
+<ul>
+<li>JavaScript native types</li>
+<li>structs (i.e. classes)</li>
+<li>unions</li>
+<li>maybe</li>
+<li>enums</li>
+<li>tuples</li>
+<li>subtypes</li>
+<li>lists</li>
+</ul><h2>
 <a name="quick-example" class="anchor" href="#quick-example"><span class="octicon octicon-link"></span></a>Quick example</h2>
 
 <p>Let's build a product</p>
@@ -55,7 +70,7 @@
 <pre><code>var Product = struct({
     name: Str,                  // a REQUIRED string
     description: maybe(Str),    // an OPTIONAL string (can be `null`)
-    homepage: Url,              // a SUBTYPE string representing a URL
+    homepage: Url,              // a SUBTYPE of string representing an URL
     shippings: list(Shipping),  // a LIST of shipping methods
     category: Category,         // a string in [Audio, Video] (ENUM)
     price: union(Num, Price),   // price expressed in dollars OR in another currency (UNION)
@@ -81,6 +96,7 @@ var Price = struct({
     amount: Num
 });
 
+// get an immutable instance
 var ipod = new Product({
     name: 'iPod',
     description: 'Engineered for maximum funness.',
@@ -133,7 +149,7 @@ var t = require('tcomb');
 <h2>
 <a name="requirements" class="anchor" href="#requirements"><span class="octicon octicon-link"></span></a>Requirements</h2>
 
-<p>Some ES5 methods</p>
+<p>A few ES5 methods</p>
 
 <pre><code>Array#forEach()
 Array#map()
@@ -151,7 +167,7 @@ Object#keys()
 <pre><code>mocha
 </code></pre>
 
-<p>on the project root.</p>
+<p>in the project root.</p>
 
 <h2>
 <a name="whats-a-type" class="anchor" href="#whats-a-type"><span class="octicon octicon-link"></span></a>What's a type?</h2>
@@ -190,6 +206,7 @@ Object#keys()
 </ul><p>Example</p>
 
 <pre><code>Str.is('a'); // =&gt; true
+Nil.is(undefined); // =&gt; true
 Nil.is(0); // =&gt; false
 </code></pre>
 
@@ -247,7 +264,7 @@ p.x = 2; // ok
 
 <p>update(instance, updates, [mut])</p>
 
-<p>Returns an instance with changed props, without modify the original.</p>
+<p>Returns an instance with changed props, without modifying the original.</p>
 
 <pre><code>Point.update(p, {x: 3}); // =&gt; new Point({x: 3, y: 2})
 </code></pre>
@@ -279,7 +296,7 @@ var Shape = union([
     Rectangle
 ]);
 
-// in order to use Shape as constructor `dispatch(values) -&gt; Type` 
+// in order to use Shape as a constructor the function `dispatch(values) -&gt; Type` 
 // must be implemented
 Shape.dispatch = function (values) {
     assert(Obj.is(values));
@@ -304,7 +321,7 @@ var shape = new Shape({center: {x: 1, y: 2}, radius: 10});
 
 <p>Returns <code>true</code> if <code>x</code> belongs to the union.</p>
 
-<pre><code>Shape.is(new Circle([p, 10])); // =&gt; true
+<pre><code>Shape.is(new Circle({center: p, radius: 10})); // =&gt; true
 </code></pre>
 
 <h3>
