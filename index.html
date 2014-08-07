@@ -33,25 +33,16 @@
 
 <p>JavaScript types and combinators</p>
 
-<h2>
-<a name="why" class="anchor" href="#why"><span class="octicon octicon-link"></span></a>Why?</h2>
-
-<p>tcomb is a library which allows you to <strong>check the types</strong> of JavaScript values at runtime with a <strong>simple syntax</strong>. It is great for checking external input, for testing and for adding safety to your internal code. Bonus points: </p>
+<p><em>Why</em>. tcomb is a library which allows you to <strong>check the types</strong> of JavaScript values at runtime with a <strong>simple syntax</strong>. It is great for checking external input, for testing and for adding safety to your internal code. Bonus points: </p>
 
 <ul>
 <li>easy debugging</li>
 <li>encode/decode of your domain objects to/from JSON for free</li>
 <li>
 <strong>instances are immutables</strong> by default</li>
-</ul><h2>
-<a name="how" class="anchor" href="#how"><span class="octicon octicon-link"></span></a>How?</h2>
+</ul><p><em>How</em>. This library provides several type combinators and a built-in <code>assert</code> function you can use. When an <strong>assertion fails this library starts the debugger</strong> so you can inspect the stack and quickly find out what's wrong. The debugger starts only once after the first failed assert.</p>
 
-<p>This library provides several type combinators and a built-in <code>assert</code> function you can use. When an <strong>assertion fails this library starts the debugger</strong> so you can inspect the stack and quickly find out what's wrong. The debugger starts only once after the first failed assert.</p>
-
-<h2>
-<a name="overview" class="anchor" href="#overview"><span class="octicon octicon-link"></span></a>Overview</h2>
-
-<p>You can define and check:</p>
+<p><em>What</em>. You can define and check:</p>
 
 <ul>
 <li>JavaScript native types</li>
@@ -62,6 +53,7 @@
 <li>tuples</li>
 <li>subtypes</li>
 <li>lists</li>
+<li>function types (experimental)</li>
 </ul><h2>
 <a name="quick-example" class="anchor" href="#quick-example"><span class="octicon octicon-link"></span></a>Quick example</h2>
 
@@ -123,40 +115,23 @@ var t = require('tcomb');
 
 <p>Browser</p>
 
-<pre><code>&lt;!DOCTYPE html&gt;
-&lt;html&gt;
-    &lt;head&gt;
-        &lt;meta charset="utf-8" /&gt;
-        &lt;meta http-equiv="X-UA-Compatible" content="IE=edge"&gt;
-        &lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;
-        &lt;title&gt;tcomb setup&lt;/title&gt;
-        &lt;!--[if lt IE 9]&gt;
-        &lt;script src="shims/json2.js"&gt;&lt;/script&gt;
-        &lt;script src="shims/es5-shim.min.js"&gt;&lt;/script&gt;
-        &lt;script src="shims/es5-sham.min.js"&gt;&lt;/script&gt;
-        &lt;script src="shims/html5shiv.min.js"&gt;&lt;/script&gt;
-        &lt;![endif]--&gt;
-        &lt;script type="text/javascript" src="tcomb.js"&gt;&lt;/script&gt;
-    &lt;/head&gt;
-    &lt;body&gt;
-        &lt;script type="text/javascript"&gt;
-            console.log(t);
-        &lt;/script&gt;
-    &lt;/body&gt;
-&lt;/html&gt;
-</code></pre>
+<p>This library uses a few ES5 methods</p>
 
-<h2>
-<a name="requirements" class="anchor" href="#requirements"><span class="octicon octicon-link"></span></a>Requirements</h2>
+<ul>
+<li>Array#forEach()</li>
+<li>Array#map()</li>
+<li>Array#some()</li>
+<li>Array#every()</li>
+<li>Object#keys()</li>
+</ul><p>you can use <code>es5-shim</code> to support old browsers</p>
 
-<p>A few ES5 methods</p>
-
-<pre><code>Array#forEach()
-Array#map()
-Array#some()
-Array#every()
-Object#freeze()
-Object#keys()
+<pre><code>&lt;!--[if lt IE 9]&gt;
+&lt;script src="es5-shim.min.js"&gt;&lt;/script&gt;
+&lt;![endif]--&gt;
+&lt;script type="text/javascript" src="tcomb.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript"&gt;
+    console.log(t);
+&lt;/script&gt;
 </code></pre>
 
 <h2>
@@ -473,6 +448,19 @@ var path = new Path([
 <p>Returns <code>true</code> if <code>x</code> belongs to the list.</p>
 
 <pre><code>Path.is([{x: 0, y: 0}, {x: 1, y: 1}]);      // =&gt; true
+</code></pre>
+
+<h3>
+<a name="funcarguments-f-return-name" class="anchor" href="#funcarguments-f-return-name"><span class="octicon octicon-link"></span></a>func(Arguments, f, [Return], [name])</h3>
+
+<p>Defines a function where the <code>arguments</code> and the return value are checked.</p>
+
+<pre><code>var sum = func(tuple([Num, Num]), function (a, b) {
+    return a + b;
+}, Num);
+
+sum(1, 2); // =&gt; 3
+sum(1, 'a'); // =&gt; fail!
 </code></pre>
 
 <p><strong>Useful methods</strong></p>
