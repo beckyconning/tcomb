@@ -68,9 +68,10 @@
 <li>lists</li>
 <li>function types (experimental)</li>
 </ul><h2>
-<a name="quick-example" class="anchor" href="#quick-example"><span class="octicon octicon-link"></span></a>Quick example</h2>
+<a name="quick-examples" class="anchor" href="#quick-examples"><span class="octicon octicon-link"></span></a>Quick examples</h2>
 
-<p>Let's build a product</p>
+<h3>
+<a name="lets-build-a-new-product-model" class="anchor" href="#lets-build-a-new-product-model"><span class="octicon octicon-link"></span></a>Let's build a new product model</h3>
 
 <pre><code>// a struct
 var Product = struct({
@@ -110,6 +111,35 @@ var json = {
 
 // get an immutable instance
 var ipod = new Product(json);
+</code></pre>
+
+<h3>
+<a name="you-have-existing-code-and-you-want-to-add-safety" class="anchor" href="#you-have-existing-code-and-you-want-to-add-safety"><span class="octicon octicon-link"></span></a>You have existing code and you want to add safety</h3>
+
+<pre><code>// your code: plain old JavaScript class
+function Point (x, y) {
+    this.x = x;
+    this.y = y;
+}
+
+var p = new Point(1, 'a'); // silent error
+</code></pre>
+
+<p>in order to "tcombify" your code you can simply add some assertion (and a <code>is()</code> method if you want to use the combinators)</p>
+
+<pre><code>// plain old JavaScript class
+function Point (x, y) {
+    assert(Num.is(x));
+    assert(Num.is(y));
+    this.x = x;
+    this.y = y;
+}
+
+Point.is = function (x) {
+    return x instanceof Point;
+};
+
+var p = new Point(1, 'a'); // =&gt; fail! debugger kicks in
 </code></pre>
 
 <h2>
@@ -173,13 +203,23 @@ var t = require('tcomb');
 <a name="api" class="anchor" href="#api"><span class="octicon octicon-link"></span></a>Api</h2>
 
 <h3>
+<a name="assertguard-message" class="anchor" href="#assertguard-message"><span class="octicon octicon-link"></span></a>assert(guard, [message]);</h3>
+
+<p>If <code>guard !== true</code> the debugger kicks in.</p>
+
+<ul>
+<li>
+<code>guard</code> boolean condition</li>
+<li>
+<code>message</code> optional string useful for debugging</li>
+</ul><h3>
 <a name="structprops-name" class="anchor" href="#structprops-name"><span class="octicon octicon-link"></span></a>struct(props, [name])</h3>
 
 <p>Defines a struct like type.</p>
 
 <ul>
 <li>
-<code>props</code> hash field name -&gt; type</li>
+<code>props</code> hash name -&gt; type</li>
 <li>
 <code>name</code> optional string useful for debugging</li>
 </ul><p>Example</p>
@@ -272,6 +312,13 @@ MaybeStr.is(1);       // =&gt; false
 
 <p>Defines an enum of strings.</p>
 
+<ul>
+<li>
+<code>map</code> hash enum -&gt; value</li>
+<li>
+<code>name</code> optional string useful for debugging</li>
+</ul><p>Example</p>
+
 <pre><code>var Direction = enums({
     North: 0, 
     East: 1,
@@ -291,6 +338,13 @@ MaybeStr.is(1);       // =&gt; false
 <a name="tupletypes-name" class="anchor" href="#tupletypes-name"><span class="octicon octicon-link"></span></a>tuple(types, [name])</h3>
 
 <p>Defines a tuple whose coordinates have the specified types.</p>
+
+<ul>
+<li>
+<code>types</code> array of coordinates types</li>
+<li>
+<code>name</code> optional string useful for debugging</li>
+</ul><p>Example</p>
 
 <pre><code>var Args = tuple([Num, Num]);
 
@@ -318,6 +372,16 @@ Args.is([1, 2, 3]);   // =&gt; false, too many elements
 
 <p>Defines a subtype of an existing type.</p>
 
+<ul>
+<li>
+<code>type</code> the supertype</li>
+<li>
+<code>predicate</code>: a function with signature <code>(x) -&gt; boolean</code>
+</li>
+<li>
+<code>name</code> optional string useful for debugging</li>
+</ul><p>Example</p>
+
 <pre><code>var Int = subtype(Num, function (n) {
     return n === parseInt(n, 10);
 });
@@ -344,6 +408,13 @@ Int.is(1.1);    // =&gt; false
 
 <p>Defines an array where all elements are of type <code>type</code>.</p>
 
+<ul>
+<li>
+<code>type</code> type of all the elements</li>
+<li>
+<code>name</code> optional string useful for debugging</li>
+</ul><p>Example</p>
+
 <pre><code>var Path = list(Point);
 
 // costructor usage
@@ -357,14 +428,15 @@ var path = new Path([
 
 <p>Returns <code>true</code> if <code>x</code> belongs to the list.</p>
 
-<pre><code>Path.is([{x: 0, y: 0}, {x: 1, y: 1}]);      // =&gt; true
+<pre><code>var p1 = new Point({x: 0, y: 0});
+var p2 = new Point({x: 1, y: 2});
+Path.is([p1, p2]); // =&gt; true
 </code></pre>
 
-<p><strong>Useful methods</strong></p>
+<p>Useful methods</p>
 
-<p>Return an instance without modifying the original.</p>
-
-<pre><code>Path.append(path, element, [mut]);
+<pre><code>// all of these methods return an instance without modifying the original.
+Path.append(path, element, [mut]);
 Path.prepend(path, element, [mut]);
 Path.update(path, index, element, [mut]);
 Path.remove(path, index, [mut]);
@@ -375,6 +447,18 @@ Path.move(path, from, to, [mut]);
 <a name="funcarguments-f-return-name" class="anchor" href="#funcarguments-f-return-name"><span class="octicon octicon-link"></span></a>func(Arguments, f, [Return], [name])</h3>
 
 <p><strong>Experimental</strong>. Defines a function where the <code>arguments</code> and the return value are checked.</p>
+
+<ul>
+<li>
+<code>Arguments</code> the type of <code>arguments</code>
+</li>
+<li>
+<code>f</code> the function to execute</li>
+<li>
+<code>Return</code> optional type of the return value</li>
+<li>
+<code>name</code> optional string useful for debugging</li>
+</ul><p>Example</p>
 
 <pre><code>var sum = func(tuple([Num, Num]), function (a, b) {
     return a + b;
