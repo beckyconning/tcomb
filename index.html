@@ -31,21 +31,34 @@
         <h1>
 <a name="tcomb" class="anchor" href="#tcomb"><span class="octicon octicon-link"></span></a>tcomb</h1>
 
-<p>JavaScript types and combinators</p>
-
-<p><em>Why</em>. tcomb is a library which allows you to <strong>check the types</strong> of JavaScript values at runtime with a <strong>simple syntax</strong>. It is great for checking external input, for testing and for adding safety to your internal code. Bonus points: </p>
+<p>tcomb is a library which allows you to <strong>check the types</strong> of JavaScript values at runtime with a <strong>simple syntax</strong>. It is great for checking external input, for testing and for adding safety to your internal code. Bonus points: </p>
 
 <ul>
+<li>write complex domain models in a breeze and with small code footprint</li>
 <li>easy debugging</li>
-<li>encode/decode of your domain objects to/from JSON for free</li>
 <li>
 <strong>instances are immutables</strong> by default</li>
-</ul><p><em>How</em>. This library provides several type combinators and a built-in <code>assert</code> function you can use. When an <strong>assertion fails this library starts the debugger</strong> so you can inspect the stack and quickly find out what's wrong. The debugger starts only once after the first failed assert.</p>
+<li>encode/decode of domain objects to/from JSON for free</li>
+<li>make your existing code safer gradually</li>
+</ul><p>The library provides several type combinators and a built-in <code>assert</code> function. When an assertion fails the library <strong>starts the debugger</strong> so you can inspect the stack and quickly find out what's wrong.</p>
 
-<p><em>What</em>. You can define and check:</p>
+<p>You can check:</p>
 
 <ul>
-<li>JavaScript native types</li>
+<li>JavaScript native types
+
+<ul>
+<li>Nil: <code>null</code> and  <code>undefined</code>
+</li>
+<li>Str: strings</li>
+<li>Num: numbers</li>
+<li>Bool: booleans</li>
+<li>Arr: arrays</li>
+<li>Obj: plain objects</li>
+<li>Func: functions</li>
+<li>Err: errors</li>
+</ul>
+</li>
 <li>structs (i.e. classes)</li>
 <li>unions</li>
 <li>maybe</li>
@@ -59,28 +72,24 @@
 
 <p>Let's build a product</p>
 
-<pre><code>var Product = struct({
-    name: Str,                  // a REQUIRED string
-    description: maybe(Str),    // an OPTIONAL string (can be `null`)
-    homepage: Url,              // a SUBTYPE of string representing an URL
-    shippings: list(Shipping),  // a LIST of shipping methods
-    category: Category,         // a string in [Audio, Video] (ENUM)
-    price: union(Num, Price),   // price expressed in dollars OR in another currency (UNION)
-    dim: tuple([Num, Num])      // width x height (TUPLE)
+<pre><code>// a struct
+var Product = struct({
+    name: Str,                  // required string
+    description: maybe(Str),    // optional string, can be `null` or `undefined`
+    homepage: Url,              // a subtype of a string
+    shippings: list(Str),       // a list of shipping methods
+    category: Category,         // an enumeration
+    price: union(Num, Price),   // a price expressed in dollars OR in another currency
+    dim: tuple([Num, Num])      // a tuple (width, height)
 });
 
 var Url = subtype(Str, function (s) {
     return s.indexOf('http://') === 0;
 });
 
-var Shipping = struct({
-    description: Str,
-    cost: Num
-});
-
 var Category = enums({
-    Audio: 0,
-    Video: 1
+    audio: 0,
+    video: 1
 });
 
 var Price = struct({
@@ -88,19 +97,19 @@ var Price = struct({
     amount: Num
 });
 
-// get an immutable instance
-var ipod = new Product({
+// JSON representation of a product
+var json = {
     name: 'iPod',
     description: 'Engineered for maximum funness.',
     homepage: 'http://www.apple.com/ipod/',
-    shippings: [{
-        description: 'Shipped to your door, free.',
-        cost: 0
-    }],
-    category: 'Audio',
+    shippings: ['Same Day', 'Next Businness Day'],
+    category: 'audio',
     price: {currency: 'EUR', amount: 100},
     dim: [2.4, 4.1]
-});
+};
+
+// get an immutable instance
+var ipod = new Product(json);
 </code></pre>
 
 <h2>
@@ -164,28 +173,6 @@ var t = require('tcomb');
 <a name="api" class="anchor" href="#api"><span class="octicon octicon-link"></span></a>Api</h2>
 
 <h3>
-<a name="primitivename-is" class="anchor" href="#primitivename-is"><span class="octicon octicon-link"></span></a>primitive(name, is)</h3>
-
-<p>Used internally to define JavaScript native types:</p>
-
-<ul>
-<li>Nil: <code>null</code> and  <code>undefined</code>
-</li>
-<li>Str: strings</li>
-<li>Num: numbers</li>
-<li>Bool: booleans</li>
-<li>Arr: arrays</li>
-<li>Obj: plain objects</li>
-<li>Func: functions</li>
-<li>Err: errors</li>
-</ul><p>Example</p>
-
-<pre><code>Str.is('a'); // =&gt; true
-Nil.is(undefined); // =&gt; true
-Nil.is(0); // =&gt; false
-</code></pre>
-
-<h3>
 <a name="structprops-name" class="anchor" href="#structprops-name"><span class="octicon octicon-link"></span></a>struct(props, [name])</h3>
 
 <p>Defines a struct like type.</p>
@@ -202,11 +189,9 @@ var Point = struct({
     x: Num,
     y: Num
 });
-</code></pre>
 
-<p>Methods are defined as usual</p>
-
-<pre><code>Point.prototype.toString = function () {
+// methods are defined as usual
+Point.prototype.toString = function () {
     return '(' + this.x + ', ' + this.y + ')';
 };
 </code></pre>
@@ -219,15 +204,6 @@ p.x = 2; // =&gt; TypeError, p is immutable
 
 p = new Point({x: 1, y: 2}, true); // now p is mutable
 p.x = 2; // ok
-</code></pre>
-
-<p>Some meta informations are stored in a <code>meta</code> hash</p>
-
-<pre><code>Point.meta = {
-    kind: 'struct',
-    props: props,
-    name: name
-};
 </code></pre>
 
 <p>is(x)</p>
@@ -270,26 +246,6 @@ var Shape = union([
     Circle, 
     Rectangle
 ]);
-
-// in order to use Shape as a constructor the function `dispatch(values) -&gt; Type` 
-// must be implemented
-Shape.dispatch = function (values) {
-    assert(Obj.is(values));
-    return values.hasOwnProperty('center') ?
-        Circle :
-        Rectangle;   
-};
-
-var shape = new Shape({center: {x: 1, y: 2}, radius: 10});
-</code></pre>
-
-<p>Some meta informations are stored in a <code>meta</code> hash</p>
-
-<pre><code>Shape.meta = {
-    kind: 'union',
-    types: types,
-    name: name
-};
 </code></pre>
 
 <p>is(x)</p>
@@ -311,15 +267,6 @@ MaybeStr.is(null);    // =&gt; true
 MaybeStr.is(1);       // =&gt; false
 </code></pre>
 
-<p>Some meta informations are stored in a <code>meta</code> hash</p>
-
-<pre><code>MaybeStr.meta = {
-    kind: 'maybe',
-    type: type,
-    name: name
-};
-</code></pre>
-
 <h3>
 <a name="enumsmap-name" class="anchor" href="#enumsmap-name"><span class="octicon octicon-link"></span></a>enums(map, [name])</h3>
 
@@ -331,15 +278,6 @@ MaybeStr.is(1);       // =&gt; false
     South: 2, 
     West: 3
 });
-</code></pre>
-
-<p>Some meta informations are stored in a <code>meta</code> hash</p>
-
-<pre><code>Direction.meta = {
-    kind: 'enums',
-    map: map,
-    name: name
-};
 </code></pre>
 
 <p>is(x)</p>
@@ -357,15 +295,6 @@ MaybeStr.is(1);       // =&gt; false
 <pre><code>var Args = tuple([Num, Num]);
 
 var a = new Args([1, 2]);
-</code></pre>
-
-<p>Some meta informations are stored in a <code>meta</code> hash</p>
-
-<pre><code>Args.meta = {
-    kind: 'tuple',
-    types: types,
-    name: name
-};
 </code></pre>
 
 <p>is(x)</p>
@@ -402,16 +331,6 @@ var Q1Point = subtype(Point, function (p) {
 var p = new Q1Point({x: -1, y: -2}); // =&gt; fail!
 </code></pre>
 
-<p>Some meta informations are stored in a <code>meta</code> hash</p>
-
-<pre><code>Int.meta = {
-    kind: 'subtype',
-    type: type,
-    predicate: predicate,
-    name: name
-};
-</code></pre>
-
 <p>is(x)</p>
 
 <p>Returns <code>true</code> if <code>x</code> belongs to the subtype.</p>
@@ -434,33 +353,11 @@ var path = new Path([
 ]);
 </code></pre>
 
-<p>Some meta informations are stored in a <code>meta</code> hash</p>
-
-<pre><code>Path.meta = {
-    kind: 'list',
-    type: type,
-    name: name
-};
-</code></pre>
-
 <p>is(x)</p>
 
 <p>Returns <code>true</code> if <code>x</code> belongs to the list.</p>
 
 <pre><code>Path.is([{x: 0, y: 0}, {x: 1, y: 1}]);      // =&gt; true
-</code></pre>
-
-<h3>
-<a name="funcarguments-f-return-name" class="anchor" href="#funcarguments-f-return-name"><span class="octicon octicon-link"></span></a>func(Arguments, f, [Return], [name])</h3>
-
-<p>Defines a function where the <code>arguments</code> and the return value are checked.</p>
-
-<pre><code>var sum = func(tuple([Num, Num]), function (a, b) {
-    return a + b;
-}, Num);
-
-sum(1, 2); // =&gt; 3
-sum(1, 'a'); // =&gt; fail!
 </code></pre>
 
 <p><strong>Useful methods</strong></p>
@@ -475,95 +372,25 @@ Path.move(path, from, to, [mut]);
 </code></pre>
 
 <h3>
-<a name="utils" class="anchor" href="#utils"><span class="octicon octicon-link"></span></a>Utils</h3>
+<a name="funcarguments-f-return-name" class="anchor" href="#funcarguments-f-return-name"><span class="octicon octicon-link"></span></a>func(Arguments, f, [Return], [name])</h3>
 
-<pre><code>fail(message)
+<p><strong>Experimental</strong>. Defines a function where the <code>arguments</code> and the return value are checked.</p>
 
-assert(guard, [message])
+<pre><code>var sum = func(tuple([Num, Num]), function (a, b) {
+    return a + b;
+}, Num);
 
-// make properties immutables unless `unless` is `true`
-freeze(obj_or_arr, [unless])
-
-// adds the properties of `y` to `x`. If `overwrite` is falsy
-// and a property already exists, throws an error
-mixin(x, y, [overwrite])
-
-// array manipulation
-append(arr, element);
-prepend(arr, element);
-update(arr, index, element);
-remove(arr, index);
-move(arr, from, to);
+sum(1, 2); // =&gt; 3
+sum(1, 'a'); // =&gt; fail!
 </code></pre>
 
 <h2>
-<a name="more-examples" class="anchor" href="#more-examples"><span class="octicon octicon-link"></span></a>More examples</h2>
+<a name="todo" class="anchor" href="#todo"><span class="octicon octicon-link"></span></a>TODO</h2>
 
-<h3>
-<a name="how-to-extend-a-struct" class="anchor" href="#how-to-extend-a-struct"><span class="octicon octicon-link"></span></a>How to extend a struct</h3>
-
-<pre><code>var Point3D = struct(mixin(Point.meta.props, {
-    z: Num
-}));
-
-var p = new Point3D({x: 1, y: 2, z: 3});
-</code></pre>
-
-<h3>
-<a name="deep-update-of-a-struct" class="anchor" href="#deep-update-of-a-struct"><span class="octicon octicon-link"></span></a>Deep update of a struct</h3>
-
-<pre><code>var c = new Circle({center: {x: 1, y: 2}, radius: 10});
-
-// translate x by 1
-var c2 = Circle.update(c, {
-    center: Point.update(c.center, {
-        x: c.center.x + 1
-    })
-});
-</code></pre>
-
-<h3>
-<a name="write-a-general-json-decoder" class="anchor" href="#write-a-general-json-decoder"><span class="octicon octicon-link"></span></a>Write a general JSON Decoder</h3>
-
-<pre><code>// (json, T, mut) -&gt; instance of T
-function decode(json, T, mut) {
-    if (T.fromJSON) {
-        return T.fromJSON(json, mut);
-    }
-    switch (T.meta.kind) {
-        case 'struct' :
-            var values = {};
-            var props = T.meta.props;
-            for (var prop in props) {
-                if (props.hasOwnProperty(prop)) {
-                    values[prop] = decode(json[prop], props[prop], mut);    
-                }
-            }
-            return new T(values, mut);
-        case 'union' :
-            assert(Func.is(T.dispatch));
-            return decode(json, T.dispatch(json), mut);
-        case 'maybe' :
-            return Nil.is(json) ? undefined : decode(json, T.meta.type, mut);
-        case 'tuple' :
-            return freeze(json.map(function (x, i) {
-                return decode(x, T.meta.types[i], mut);
-            }, mut));
-        case 'subtype' :
-            var x = decode(json, T.meta.type, mut); 
-            assert(T.meta.predicate(x));
-            return x;
-        case 'list' :
-            return freeze(json.map(function (x) {
-                return decode(x, T.meta.type, mut);
-            }), mut);
-        default :
-            return json;
-    }
-};
-</code></pre>
-
-<h2>
+<ul>
+<li>more tests</li>
+<li>jsDoc comments</li>
+</ul><h2>
 <a name="copyright--license" class="anchor" href="#copyright--license"><span class="octicon octicon-link"></span></a>Copyright &amp; License</h2>
 
 <p>Copyright (C) 2014 Giulio Canti - Released under the MIT License.</p>
