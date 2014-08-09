@@ -232,10 +232,10 @@ var t = require('tcomb');
     <span class="k">return</span> <span class="s1">'('</span> <span class="o">+</span> <span class="k">this</span><span class="p">.</span><span class="nx">x</span> <span class="o">+</span> <span class="s1">', '</span> <span class="o">+</span> <span class="k">this</span><span class="p">.</span><span class="nx">y</span> <span class="o">+</span> <span class="s1">')'</span><span class="p">;</span>
 <span class="p">};</span>
 
-<span class="c1">// building an instance is simple as</span>
+<span class="c1">// costructor usage, p is immutable</span>
 <span class="kd">var</span> <span class="nx">p</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Point</span><span class="p">({</span><span class="nx">x</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">y</span><span class="o">:</span> <span class="mi">2</span><span class="p">});</span>
 
-<span class="nx">p</span><span class="p">.</span><span class="nx">x</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span> <span class="c1">// =&gt; TypeError, p is immutable</span>
+<span class="nx">p</span><span class="p">.</span><span class="nx">x</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span> <span class="c1">// =&gt; TypeError</span>
 
 <span class="nx">p</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Point</span><span class="p">({</span><span class="nx">x</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">y</span><span class="o">:</span> <span class="mi">2</span><span class="p">},</span> <span class="kc">true</span><span class="p">);</span> <span class="c1">// now p is mutable</span>
 
@@ -253,7 +253,7 @@ var t = require('tcomb');
 <h4>
 <a name="updateinstance-updates-mut" class="anchor" href="#updateinstance-updates-mut"><span class="octicon octicon-link"></span></a>update(instance, updates, [mut])</h4>
 
-<p>Returns an instance with changed props, without modifying the original.</p>
+<p>Returns an instance with updated props, without modifying the original.</p>
 
 <div class="highlight highlight-javascript"><pre><span class="nx">Point</span><span class="p">.</span><span class="nx">update</span><span class="p">(</span><span class="nx">p</span><span class="p">,</span> <span class="p">{</span><span class="nx">x</span><span class="o">:</span> <span class="mi">3</span><span class="p">});</span> <span class="c1">// =&gt; new Point({x: 3, y: 2})</span>
 </pre></div>
@@ -299,11 +299,12 @@ var t = require('tcomb');
 
 <p>Same as <code>union([Nil, type])</code>.</p>
 
-<div class="highlight highlight-javascript"><pre><span class="kd">var</span> <span class="nx">MaybeStr</span> <span class="o">=</span> <span class="nx">maybe</span><span class="p">(</span><span class="nx">Str</span><span class="p">);</span>
+<div class="highlight highlight-javascript"><pre><span class="c1">// the value of a radio input where null = no selection</span>
+<span class="kd">var</span> <span class="nx">Radio</span> <span class="o">=</span> <span class="nx">maybe</span><span class="p">(</span><span class="nx">Str</span><span class="p">);</span>
 
-<span class="nx">MaybeStr</span><span class="p">.</span><span class="nx">is</span><span class="p">(</span><span class="s1">'a'</span><span class="p">);</span>     <span class="c1">// =&gt; true</span>
-<span class="nx">MaybeStr</span><span class="p">.</span><span class="nx">is</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>    <span class="c1">// =&gt; true</span>
-<span class="nx">MaybeStr</span><span class="p">.</span><span class="nx">is</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>       <span class="c1">// =&gt; false</span>
+<span class="nx">Radio</span><span class="p">.</span><span class="nx">is</span><span class="p">(</span><span class="s1">'a'</span><span class="p">);</span>     <span class="c1">// =&gt; true</span>
+<span class="nx">Radio</span><span class="p">.</span><span class="nx">is</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>    <span class="c1">// =&gt; true</span>
+<span class="nx">Radio</span><span class="p">.</span><span class="nx">is</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>       <span class="c1">// =&gt; false</span>
 </pre></div>
 
 <h3>
@@ -347,6 +348,9 @@ var t = require('tcomb');
 </ul><p>Example</p>
 
 <div class="highlight highlight-javascript"><pre><span class="kd">var</span> <span class="nx">Area</span> <span class="o">=</span> <span class="nx">tuple</span><span class="p">([</span><span class="nx">Num</span><span class="p">,</span> <span class="nx">Num</span><span class="p">]);</span>
+
+<span class="c1">// constructor usage, area is immutable</span>
+<span class="kd">var</span> <span class="nx">area</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Area</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]);</span>
 </pre></div>
 
 <h4>
@@ -364,7 +368,7 @@ var t = require('tcomb');
 
 <p>Returns an instance without modifying the original.</p>
 
-<div class="highlight highlight-javascript"><pre><span class="nx">Area</span><span class="p">.</span><span class="nx">update</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>    <span class="c1">// =&gt; [2, 2]</span>
+<div class="highlight highlight-javascript"><pre><span class="nx">Area</span><span class="p">.</span><span class="nx">update</span><span class="p">(</span><span class="nx">area</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>    <span class="c1">// =&gt; [2, 2]</span>
 </pre></div>
 
 <h3>
@@ -382,17 +386,15 @@ var t = require('tcomb');
 <code>name</code> optional string useful for debugging</li>
 </ul><p>Example</p>
 
-<div class="highlight highlight-javascript"><pre><span class="kd">var</span> <span class="nx">Int</span> <span class="o">=</span> <span class="nx">subtype</span><span class="p">(</span><span class="nx">Num</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">n</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="nx">n</span> <span class="o">===</span> <span class="nb">parseInt</span><span class="p">(</span><span class="nx">n</span><span class="p">,</span> <span class="mi">10</span><span class="p">);</span>
-<span class="p">});</span>
-
-<span class="c1">// points of the first quadrant</span>
+<div class="highlight highlight-javascript"><pre><span class="c1">// points of the first quadrant</span>
 <span class="kd">var</span> <span class="nx">Q1Point</span> <span class="o">=</span> <span class="nx">subtype</span><span class="p">(</span><span class="nx">Point</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">p</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">return</span> <span class="nx">p</span><span class="p">.</span><span class="nx">x</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="nx">p</span><span class="p">.</span><span class="nx">y</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">;</span>
 <span class="p">});</span>
 
-<span class="c1">// constructor usage</span>
-<span class="kd">var</span> <span class="nx">p</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Q1Point</span><span class="p">({</span><span class="nx">x</span><span class="o">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nx">y</span><span class="o">:</span> <span class="o">-</span><span class="mi">2</span><span class="p">});</span> <span class="c1">// =&gt; fail!</span>
+<span class="c1">// costructor usage, p is immutable</span>
+<span class="kd">var</span> <span class="nx">p</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Q1Point</span><span class="p">({</span><span class="nx">x</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">y</span><span class="o">:</span> <span class="mi">2</span><span class="p">});</span>
+
+<span class="nx">p</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Q1Point</span><span class="p">({</span><span class="nx">x</span><span class="o">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nx">y</span><span class="o">:</span> <span class="o">-</span><span class="mi">2</span><span class="p">});</span> <span class="c1">// =&gt; fail!</span>
 </pre></div>
 
 <h4>
@@ -400,7 +402,11 @@ var t = require('tcomb');
 
 <p>Returns <code>true</code> if <code>x</code> belongs to the subtype.</p>
 
-<div class="highlight highlight-javascript"><pre><span class="nx">Int</span><span class="p">.</span><span class="nx">is</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>      <span class="c1">// =&gt; true</span>
+<div class="highlight highlight-javascript"><pre><span class="kd">var</span> <span class="nx">Int</span> <span class="o">=</span> <span class="nx">subtype</span><span class="p">(</span><span class="nx">Num</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">n</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">n</span> <span class="o">===</span> <span class="nb">parseInt</span><span class="p">(</span><span class="nx">n</span><span class="p">,</span> <span class="mi">10</span><span class="p">);</span>
+<span class="p">});</span>
+
+<span class="nx">Int</span><span class="p">.</span><span class="nx">is</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>      <span class="c1">// =&gt; true</span>
 <span class="nx">Int</span><span class="p">.</span><span class="nx">is</span><span class="p">(</span><span class="mf">1.1</span><span class="p">);</span>    <span class="c1">// =&gt; false</span>
 </pre></div>
 
@@ -418,7 +424,7 @@ var t = require('tcomb');
 
 <div class="highlight highlight-javascript"><pre><span class="kd">var</span> <span class="nx">Path</span> <span class="o">=</span> <span class="nx">list</span><span class="p">(</span><span class="nx">Point</span><span class="p">);</span>
 
-<span class="c1">// costructor usage</span>
+<span class="c1">// costructor usage, path is immutable</span>
 <span class="kd">var</span> <span class="nx">path</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Path</span><span class="p">([</span>
     <span class="p">{</span><span class="nx">x</span><span class="o">:</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">y</span><span class="o">:</span> <span class="mi">0</span><span class="p">},</span> 
     <span class="p">{</span><span class="nx">x</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">y</span><span class="o">:</span> <span class="mi">1</span><span class="p">}</span>
