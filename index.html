@@ -73,74 +73,69 @@
 <h3>
 <a name="lets-build-a-new-product-model" class="anchor" href="#lets-build-a-new-product-model"><span class="octicon octicon-link"></span></a>Let's build a new product model</h3>
 
-<pre><code>// a struct
-var Product = struct({
-    name: Str,                  // required string
-    description: maybe(Str),    // optional string, can be `null` or `undefined`
-    homepage: Url,              // a subtype of a string
-    shippings: list(Str),       // a list of shipping methods
-    category: Category,         // an enumeration
-    price: union(Num, Price),   // a price expressed in dollars OR in another currency
-    dim: tuple([Num, Num])      // a tuple (width, height)
-});
+<div class="highlight highlight-javascript"><pre><span class="c1">// a struct</span>
+<span class="kd">var</span> <span class="nx">Product</span> <span class="o">=</span> <span class="nx">struct</span><span class="p">({</span>
+    <span class="nx">name</span><span class="o">:</span> <span class="nx">Str</span><span class="p">,</span>                  <span class="c1">// required string</span>
+    <span class="nx">description</span><span class="o">:</span> <span class="nx">maybe</span><span class="p">(</span><span class="nx">Str</span><span class="p">),</span>    <span class="c1">// optional string, can be null or undefined</span>
+    <span class="nx">homepage</span><span class="o">:</span> <span class="nx">Url</span><span class="p">,</span>              <span class="c1">// a subtype of a string</span>
+    <span class="nx">shippings</span><span class="o">:</span> <span class="nx">list</span><span class="p">(</span><span class="nx">Str</span><span class="p">),</span>       <span class="c1">// a list of shipping methods</span>
+    <span class="nx">category</span><span class="o">:</span> <span class="nx">Category</span><span class="p">,</span>         <span class="c1">// an enumeration</span>
+    <span class="nx">price</span><span class="o">:</span> <span class="nx">union</span><span class="p">(</span><span class="nx">Num</span><span class="p">,</span> <span class="nx">Price</span><span class="p">),</span>   <span class="c1">// a price expressed in dollars OR in another currency</span>
+    <span class="nx">dim</span><span class="o">:</span> <span class="nx">tuple</span><span class="p">([</span><span class="nx">Num</span><span class="p">,</span> <span class="nx">Num</span><span class="p">])</span>      <span class="c1">// a tuple (width, height)</span>
+<span class="p">});</span>
 
-var Url = subtype(Str, function (s) {
-    return s.indexOf('http://') === 0;
-});
+<span class="kd">var</span> <span class="nx">Url</span> <span class="o">=</span> <span class="nx">subtype</span><span class="p">(</span><span class="nx">Str</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">s</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">s</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="s1">'http://'</span><span class="p">)</span> <span class="o">===</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">});</span>
 
-var Category = enums({
-    audio: 0,
-    video: 1
-});
+<span class="kd">var</span> <span class="nx">Category</span> <span class="o">=</span> <span class="nx">enums</span><span class="p">({</span>
+    <span class="nx">audio</span><span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="nx">video</span><span class="o">:</span> <span class="mi">1</span>
+<span class="p">});</span>
 
-var Price = struct({
-    currency: Str,
-    amount: Num
-});
+<span class="kd">var</span> <span class="nx">Price</span> <span class="o">=</span> <span class="nx">struct</span><span class="p">({</span>
+    <span class="nx">currency</span><span class="o">:</span> <span class="nx">Str</span><span class="p">,</span>
+    <span class="nx">amount</span><span class="o">:</span> <span class="nx">Num</span>
+<span class="p">});</span>
 
-// JSON representation of a product
-var json = {
-    name: 'iPod',
-    description: 'Engineered for maximum funness.',
-    homepage: 'http://www.apple.com/ipod/',
-    shippings: ['Same Day', 'Next Businness Day'],
-    category: 'audio',
-    price: {currency: 'EUR', amount: 100},
-    dim: [2.4, 4.1]
-};
+<span class="c1">// JSON of a product</span>
+<span class="kd">var</span> <span class="nx">json</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="nx">name</span><span class="o">:</span> <span class="s1">'iPod'</span><span class="p">,</span>
+    <span class="nx">description</span><span class="o">:</span> <span class="s1">'Engineered for maximum funness.'</span><span class="p">,</span>
+    <span class="nx">homepage</span><span class="o">:</span> <span class="s1">'http://www.apple.com/ipod/'</span><span class="p">,</span>
+    <span class="nx">shippings</span><span class="o">:</span> <span class="p">[</span><span class="s1">'Same Day'</span><span class="p">,</span> <span class="s1">'Next Businness Day'</span><span class="p">],</span>
+    <span class="nx">category</span><span class="o">:</span> <span class="s1">'audio'</span><span class="p">,</span>
+    <span class="nx">price</span><span class="o">:</span> <span class="p">{</span><span class="nx">currency</span><span class="o">:</span> <span class="s1">'EUR'</span><span class="p">,</span> <span class="nx">amount</span><span class="o">:</span> <span class="mi">100</span><span class="p">},</span>
+    <span class="nx">dim</span><span class="o">:</span> <span class="p">[</span><span class="mf">2.4</span><span class="p">,</span> <span class="mf">4.1</span><span class="p">]</span>
+<span class="p">};</span>
 
-// get an immutable instance
-var ipod = new Product(json);
-</code></pre>
+<span class="c1">// get an immutable instance</span>
+<span class="kd">var</span> <span class="nx">ipod</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Product</span><span class="p">(</span><span class="nx">json</span><span class="p">);</span>
+</pre></div>
 
 <h3>
 <a name="you-have-existing-code-and-you-want-to-add-safety" class="anchor" href="#you-have-existing-code-and-you-want-to-add-safety"><span class="octicon octicon-link"></span></a>You have existing code and you want to add safety</h3>
 
-<pre><code>// your code: plain old JavaScript class
-function Point (x, y) {
-    this.x = x;
-    this.y = y;
-}
+<div class="highlight highlight-javascript"><pre><span class="c1">// your code: plain old JavaScript class</span>
+<span class="kd">function</span> <span class="nx">Point</span> <span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">x</span> <span class="o">=</span> <span class="nx">x</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">y</span> <span class="o">=</span> <span class="nx">y</span><span class="p">;</span>
+<span class="p">}</span>
 
-var p = new Point(1, 'a'); // silent error
-</code></pre>
+<span class="kd">var</span> <span class="nx">p</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">'a'</span><span class="p">);</span> <span class="c1">// silent error</span>
+</pre></div>
 
-<p>in order to "tcombify" your code you can simply add some assertion (and a <code>is()</code> method if you want to use the combinators)</p>
+<p>in order to "tcombify" your code you can simply add some assertion</p>
 
-<pre><code>// plain old JavaScript class
-function Point (x, y) {
-    assert(Num.is(x));
-    assert(Num.is(y));
-    this.x = x;
-    this.y = y;
-}
+<div class="highlight highlight-javascript"><pre><span class="kd">function</span> <span class="nx">Point</span> <span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">assert</span><span class="p">(</span><span class="nx">Num</span><span class="p">.</span><span class="nx">is</span><span class="p">(</span><span class="nx">x</span><span class="p">));</span>
+    <span class="nx">assert</span><span class="p">(</span><span class="nx">Num</span><span class="p">.</span><span class="nx">is</span><span class="p">(</span><span class="nx">y</span><span class="p">));</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">x</span> <span class="o">=</span> <span class="nx">x</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">y</span> <span class="o">=</span> <span class="nx">y</span><span class="p">;</span>
+<span class="p">}</span>
 
-Point.is = function (x) {
-    return x instanceof Point;
-};
-
-var p = new Point(1, 'a'); // =&gt; fail! debugger kicks in
-</code></pre>
+<span class="kd">var</span> <span class="nx">p</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">'a'</span><span class="p">);</span> <span class="c1">// =&gt; fail! debugger kicks in</span>
+</pre></div>
 
 <h2>
 <a name="setup" class="anchor" href="#setup"><span class="octicon octicon-link"></span></a>Setup</h2>
@@ -157,21 +152,21 @@ var t = require('tcomb');
 <p>This library uses a few ES5 methods</p>
 
 <ul>
-<li>Array#forEach()</li>
-<li>Array#map()</li>
-<li>Array#some()</li>
-<li>Array#every()</li>
-<li>Object#keys()</li>
+<li><code>Array#forEach()</code></li>
+<li><code>Array#map()</code></li>
+<li><code>Array#some()</code></li>
+<li><code>Array#every()</code></li>
+<li><code>Object#keys()</code></li>
 </ul><p>you can use <code>es5-shim</code> to support old browsers</p>
 
-<pre><code>&lt;!--[if lt IE 9]&gt;
-&lt;script src="es5-shim.min.js"&gt;&lt;/script&gt;
-&lt;![endif]--&gt;
-&lt;script type="text/javascript" src="tcomb.js"&gt;&lt;/script&gt;
-&lt;script type="text/javascript"&gt;
-    console.log(t);
-&lt;/script&gt;
-</code></pre>
+<div class="highlight highlight-html"><pre><span class="c">&lt;!--[if lt IE 9]&gt;</span>
+<span class="c">&lt;script src="es5-shim.min.js"&gt;&lt;/script&gt;</span>
+<span class="c">&lt;![endif]--&gt;</span>
+<span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"tcomb.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+<span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span><span class="nt">&gt;</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">t</span><span class="p">);</span>
+<span class="nt">&lt;/script&gt;</span>
+</pre></div>
 
 <h2>
 <a name="tests" class="anchor" href="#tests"><span class="octicon octicon-link"></span></a>Tests</h2>
@@ -224,41 +219,44 @@ var t = require('tcomb');
 <code>name</code> optional string useful for debugging</li>
 </ul><p>Example</p>
 
-<pre><code>// define a struct with two numerical props
-var Point = struct({
-    x: Num,
-    y: Num
-});
+<div class="highlight highlight-javascript"><pre><span class="s2">"use strict"</span><span class="p">;</span>
 
-// methods are defined as usual
-Point.prototype.toString = function () {
-    return '(' + this.x + ', ' + this.y + ')';
-};
-</code></pre>
+<span class="c1">// define a struct with two numerical props</span>
+<span class="kd">var</span> <span class="nx">Point</span> <span class="o">=</span> <span class="nx">struct</span><span class="p">({</span>
+    <span class="nx">x</span><span class="o">:</span> <span class="nx">Num</span><span class="p">,</span>
+    <span class="nx">y</span><span class="o">:</span> <span class="nx">Num</span>
+<span class="p">});</span>
 
-<p>Building an instance is simple as</p>
+<span class="c1">// methods are defined as usual</span>
+<span class="nx">Point</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">toString</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="s1">'('</span> <span class="o">+</span> <span class="k">this</span><span class="p">.</span><span class="nx">x</span> <span class="o">+</span> <span class="s1">', '</span> <span class="o">+</span> <span class="k">this</span><span class="p">.</span><span class="nx">y</span> <span class="o">+</span> <span class="s1">')'</span><span class="p">;</span>
+<span class="p">};</span>
 
-<pre><code>"use strict";
-var p = new Point({x: 1, y: 2});
-p.x = 2; // =&gt; TypeError, p is immutable
+<span class="c1">// building an instance is simple as</span>
+<span class="kd">var</span> <span class="nx">p</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Point</span><span class="p">({</span><span class="nx">x</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">y</span><span class="o">:</span> <span class="mi">2</span><span class="p">});</span>
 
-p = new Point({x: 1, y: 2}, true); // now p is mutable
-p.x = 2; // ok
-</code></pre>
+<span class="nx">p</span><span class="p">.</span><span class="nx">x</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span> <span class="c1">// =&gt; TypeError, p is immutable</span>
 
-<p>is(x)</p>
+<span class="nx">p</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Point</span><span class="p">({</span><span class="nx">x</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">y</span><span class="o">:</span> <span class="mi">2</span><span class="p">},</span> <span class="kc">true</span><span class="p">);</span> <span class="c1">// now p is mutable</span>
+
+<span class="nx">p</span><span class="p">.</span><span class="nx">x</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span> <span class="c1">// ok</span>
+</pre></div>
+
+<h4>
+<a name="isx" class="anchor" href="#isx"><span class="octicon octicon-link"></span></a>is(x)</h4>
 
 <p>Returns <code>true</code> if <code>x</code> is an instance of <code>Point</code>.</p>
 
-<pre><code>Point.is(p); // =&gt; true
-</code></pre>
+<div class="highlight highlight-javascript"><pre><span class="nx">Point</span><span class="p">.</span><span class="nx">is</span><span class="p">(</span><span class="nx">p</span><span class="p">);</span> <span class="c1">// =&gt; true</span>
+</pre></div>
 
-<p>update(instance, updates, [mut])</p>
+<h4>
+<a name="updateinstance-updates-mut" class="anchor" href="#updateinstance-updates-mut"><span class="octicon octicon-link"></span></a>update(instance, updates, [mut])</h4>
 
 <p>Returns an instance with changed props, without modifying the original.</p>
 
-<pre><code>Point.update(p, {x: 3}); // =&gt; new Point({x: 3, y: 2})
-</code></pre>
+<div class="highlight highlight-javascript"><pre><span class="nx">Point</span><span class="p">.</span><span class="nx">update</span><span class="p">(</span><span class="nx">p</span><span class="p">,</span> <span class="p">{</span><span class="nx">x</span><span class="o">:</span> <span class="mi">3</span><span class="p">});</span> <span class="c1">// =&gt; new Point({x: 3, y: 2})</span>
+</pre></div>
 
 <h3>
 <a name="uniontypes-name" class="anchor" href="#uniontypes-name"><span class="octicon octicon-link"></span></a>union(types, [name])</h3>
@@ -272,40 +270,41 @@ p.x = 2; // ok
 <code>name</code> optional string useful for debugging</li>
 </ul><p>Example</p>
 
-<pre><code>var Circle = struct({
-    center: Point,
-    radius: Num
-});
+<div class="highlight highlight-javascript"><pre><span class="kd">var</span> <span class="nx">Circle</span> <span class="o">=</span> <span class="nx">struct</span><span class="p">({</span>
+    <span class="nx">center</span><span class="o">:</span> <span class="nx">Point</span><span class="p">,</span>
+    <span class="nx">radius</span><span class="o">:</span> <span class="nx">Num</span>
+<span class="p">});</span>
 
-var Rectangle = struct({
-    bl: Point, // bottom left vertex
-    tr: Point  // top right vertex
-});
+<span class="kd">var</span> <span class="nx">Rectangle</span> <span class="o">=</span> <span class="nx">struct</span><span class="p">({</span>
+    <span class="nx">bl</span><span class="o">:</span> <span class="nx">Point</span><span class="p">,</span> <span class="c1">// bottom left vertex</span>
+    <span class="nx">tr</span><span class="o">:</span> <span class="nx">Point</span>  <span class="c1">// top right vertex</span>
+<span class="p">});</span>
 
-var Shape = union([
-    Circle, 
-    Rectangle
-]);
-</code></pre>
+<span class="kd">var</span> <span class="nx">Shape</span> <span class="o">=</span> <span class="nx">union</span><span class="p">([</span>
+    <span class="nx">Circle</span><span class="p">,</span> 
+    <span class="nx">Rectangle</span>
+<span class="p">]);</span>
+</pre></div>
 
-<p>is(x)</p>
+<h4>
+<a name="isx-1" class="anchor" href="#isx-1"><span class="octicon octicon-link"></span></a>is(x)</h4>
 
 <p>Returns <code>true</code> if <code>x</code> belongs to the union.</p>
 
-<pre><code>Shape.is(new Circle({center: p, radius: 10})); // =&gt; true
-</code></pre>
+<div class="highlight highlight-javascript"><pre><span class="nx">Shape</span><span class="p">.</span><span class="nx">is</span><span class="p">(</span><span class="k">new</span> <span class="nx">Circle</span><span class="p">({</span><span class="nx">center</span><span class="o">:</span> <span class="nx">p</span><span class="p">,</span> <span class="nx">radius</span><span class="o">:</span> <span class="mi">10</span><span class="p">}));</span> <span class="c1">// =&gt; true</span>
+</pre></div>
 
 <h3>
 <a name="maybetype-name" class="anchor" href="#maybetype-name"><span class="octicon octicon-link"></span></a>maybe(type, [name])</h3>
 
 <p>Same as <code>union([Nil, type])</code>.</p>
 
-<pre><code>var MaybeStr = maybe(Str);
+<div class="highlight highlight-javascript"><pre><span class="kd">var</span> <span class="nx">MaybeStr</span> <span class="o">=</span> <span class="nx">maybe</span><span class="p">(</span><span class="nx">Str</span><span class="p">);</span>
 
-MaybeStr.is('a');     // =&gt; true
-MaybeStr.is(null);    // =&gt; true
-MaybeStr.is(1);       // =&gt; false
-</code></pre>
+<span class="nx">MaybeStr</span><span class="p">.</span><span class="nx">is</span><span class="p">(</span><span class="s1">'a'</span><span class="p">);</span>     <span class="c1">// =&gt; true</span>
+<span class="nx">MaybeStr</span><span class="p">.</span><span class="nx">is</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>    <span class="c1">// =&gt; true</span>
+<span class="nx">MaybeStr</span><span class="p">.</span><span class="nx">is</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>       <span class="c1">// =&gt; false</span>
+</pre></div>
 
 <h3>
 <a name="enumsmap-name" class="anchor" href="#enumsmap-name"><span class="octicon octicon-link"></span></a>enums(map, [name])</h3>
@@ -319,20 +318,21 @@ MaybeStr.is(1);       // =&gt; false
 <code>name</code> optional string useful for debugging</li>
 </ul><p>Example</p>
 
-<pre><code>var Direction = enums({
-    North: 0, 
-    East: 1,
-    South: 2, 
-    West: 3
-});
-</code></pre>
+<div class="highlight highlight-javascript"><pre><span class="kd">var</span> <span class="nx">Direction</span> <span class="o">=</span> <span class="nx">enums</span><span class="p">({</span>
+    <span class="nx">North</span><span class="o">:</span> <span class="mi">0</span><span class="p">,</span> 
+    <span class="nx">East</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="nx">South</span><span class="o">:</span> <span class="mi">2</span><span class="p">,</span> 
+    <span class="nx">West</span><span class="o">:</span> <span class="mi">3</span>
+<span class="p">});</span>
+</pre></div>
 
-<p>is(x)</p>
+<h4>
+<a name="isx-2" class="anchor" href="#isx-2"><span class="octicon octicon-link"></span></a>is(x)</h4>
 
 <p>Returns <code>true</code> if <code>x</code> belongs to the enum.</p>
 
-<pre><code>Direction.is('North'); // =&gt; true
-</code></pre>
+<div class="highlight highlight-javascript"><pre><span class="nx">Direction</span><span class="p">.</span><span class="nx">is</span><span class="p">(</span><span class="s1">'North'</span><span class="p">);</span> <span class="c1">// =&gt; true</span>
+</pre></div>
 
 <h3>
 <a name="tupletypes-name" class="anchor" href="#tupletypes-name"><span class="octicon octicon-link"></span></a>tuple(types, [name])</h3>
@@ -346,26 +346,26 @@ MaybeStr.is(1);       // =&gt; false
 <code>name</code> optional string useful for debugging</li>
 </ul><p>Example</p>
 
-<pre><code>var Args = tuple([Num, Num]);
+<div class="highlight highlight-javascript"><pre><span class="kd">var</span> <span class="nx">Area</span> <span class="o">=</span> <span class="nx">tuple</span><span class="p">([</span><span class="nx">Num</span><span class="p">,</span> <span class="nx">Num</span><span class="p">]);</span>
+</pre></div>
 
-var a = new Args([1, 2]);
-</code></pre>
-
-<p>is(x)</p>
+<h4>
+<a name="isx-3" class="anchor" href="#isx-3"><span class="octicon octicon-link"></span></a>is(x)</h4>
 
 <p>Returns <code>true</code> if <code>x</code> belongs to the tuple.</p>
 
-<pre><code>Args.is([1, 2]);      // =&gt; true
-Args.is([1, 'a']);    // =&gt; false, second element is not a Num
-Args.is([1, 2, 3]);   // =&gt; false, too many elements
-</code></pre>
+<div class="highlight highlight-javascript"><pre><span class="nx">Area</span><span class="p">.</span><span class="nx">is</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]);</span>      <span class="c1">// =&gt; true</span>
+<span class="nx">Area</span><span class="p">.</span><span class="nx">is</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="s1">'a'</span><span class="p">]);</span>    <span class="c1">// =&gt; false, second element is not a Num</span>
+<span class="nx">Area</span><span class="p">.</span><span class="nx">is</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]);</span>   <span class="c1">// =&gt; false, too many elements</span>
+</pre></div>
 
-<p>update(instance, index, element, [mut])</p>
+<h4>
+<a name="updateinstance-index-element-mut" class="anchor" href="#updateinstance-index-element-mut"><span class="octicon octicon-link"></span></a>update(instance, index, element, [mut])</h4>
 
 <p>Returns an instance without modifying the original.</p>
 
-<pre><code>Args.update(a, 0, 2);    // =&gt; [2, 2]
-</code></pre>
+<div class="highlight highlight-javascript"><pre><span class="nx">Area</span><span class="p">.</span><span class="nx">update</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>    <span class="c1">// =&gt; [2, 2]</span>
+</pre></div>
 
 <h3>
 <a name="subtypetype-predicate-name" class="anchor" href="#subtypetype-predicate-name"><span class="octicon octicon-link"></span></a>subtype(type, predicate, [name])</h3>
@@ -382,26 +382,27 @@ Args.is([1, 2, 3]);   // =&gt; false, too many elements
 <code>name</code> optional string useful for debugging</li>
 </ul><p>Example</p>
 
-<pre><code>var Int = subtype(Num, function (n) {
-    return n === parseInt(n, 10);
-});
+<div class="highlight highlight-javascript"><pre><span class="kd">var</span> <span class="nx">Int</span> <span class="o">=</span> <span class="nx">subtype</span><span class="p">(</span><span class="nx">Num</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">n</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">n</span> <span class="o">===</span> <span class="nb">parseInt</span><span class="p">(</span><span class="nx">n</span><span class="p">,</span> <span class="mi">10</span><span class="p">);</span>
+<span class="p">});</span>
 
-// points of the first quadrant
-var Q1Point = subtype(Point, function (p) {
-    return p.x &gt;= 0 &amp;&amp; p.y &gt;= 0;
-});
+<span class="c1">// points of the first quadrant</span>
+<span class="kd">var</span> <span class="nx">Q1Point</span> <span class="o">=</span> <span class="nx">subtype</span><span class="p">(</span><span class="nx">Point</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">p</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">p</span><span class="p">.</span><span class="nx">x</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="nx">p</span><span class="p">.</span><span class="nx">y</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">});</span>
 
-// constructor usage
-var p = new Q1Point({x: -1, y: -2}); // =&gt; fail!
-</code></pre>
+<span class="c1">// constructor usage</span>
+<span class="kd">var</span> <span class="nx">p</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Q1Point</span><span class="p">({</span><span class="nx">x</span><span class="o">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nx">y</span><span class="o">:</span> <span class="o">-</span><span class="mi">2</span><span class="p">});</span> <span class="c1">// =&gt; fail!</span>
+</pre></div>
 
-<p>is(x)</p>
+<h4>
+<a name="isx-4" class="anchor" href="#isx-4"><span class="octicon octicon-link"></span></a>is(x)</h4>
 
 <p>Returns <code>true</code> if <code>x</code> belongs to the subtype.</p>
 
-<pre><code>Int.is(2);      // =&gt; true
-Int.is(1.1);    // =&gt; false
-</code></pre>
+<div class="highlight highlight-javascript"><pre><span class="nx">Int</span><span class="p">.</span><span class="nx">is</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>      <span class="c1">// =&gt; true</span>
+<span class="nx">Int</span><span class="p">.</span><span class="nx">is</span><span class="p">(</span><span class="mf">1.1</span><span class="p">);</span>    <span class="c1">// =&gt; false</span>
+</pre></div>
 
 <h3>
 <a name="listtype-name" class="anchor" href="#listtype-name"><span class="octicon octicon-link"></span></a>list(type, [name])</h3>
@@ -415,33 +416,36 @@ Int.is(1.1);    // =&gt; false
 <code>name</code> optional string useful for debugging</li>
 </ul><p>Example</p>
 
-<pre><code>var Path = list(Point);
+<div class="highlight highlight-javascript"><pre><span class="kd">var</span> <span class="nx">Path</span> <span class="o">=</span> <span class="nx">list</span><span class="p">(</span><span class="nx">Point</span><span class="p">);</span>
 
-// costructor usage
-var path = new Path([
-    {x: 0, y: 0}, 
-    {x: 1, y: 1}
-]);
-</code></pre>
+<span class="c1">// costructor usage</span>
+<span class="kd">var</span> <span class="nx">path</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Path</span><span class="p">([</span>
+    <span class="p">{</span><span class="nx">x</span><span class="o">:</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">y</span><span class="o">:</span> <span class="mi">0</span><span class="p">},</span> 
+    <span class="p">{</span><span class="nx">x</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">y</span><span class="o">:</span> <span class="mi">1</span><span class="p">}</span>
+<span class="p">]);</span>
+</pre></div>
 
-<p>is(x)</p>
+<h4>
+<a name="isx-5" class="anchor" href="#isx-5"><span class="octicon octicon-link"></span></a>is(x)</h4>
 
 <p>Returns <code>true</code> if <code>x</code> belongs to the list.</p>
 
-<pre><code>var p1 = new Point({x: 0, y: 0});
-var p2 = new Point({x: 1, y: 2});
-Path.is([p1, p2]); // =&gt; true
-</code></pre>
+<div class="highlight highlight-javascript"><pre><span class="kd">var</span> <span class="nx">p1</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Point</span><span class="p">({</span><span class="nx">x</span><span class="o">:</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">y</span><span class="o">:</span> <span class="mi">0</span><span class="p">});</span>
+<span class="kd">var</span> <span class="nx">p2</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Point</span><span class="p">({</span><span class="nx">x</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">y</span><span class="o">:</span> <span class="mi">2</span><span class="p">});</span>
+<span class="nx">Path</span><span class="p">.</span><span class="nx">is</span><span class="p">([</span><span class="nx">p1</span><span class="p">,</span> <span class="nx">p2</span><span class="p">]);</span> <span class="c1">// =&gt; true</span>
+</pre></div>
 
-<p>Useful methods</p>
+<h4>
+<a name="useful-methods" class="anchor" href="#useful-methods"><span class="octicon octicon-link"></span></a>Useful methods</h4>
 
-<pre><code>// all of these methods return an instance without modifying the original.
-Path.append(path, element, [mut]);
-Path.prepend(path, element, [mut]);
-Path.update(path, index, element, [mut]);
-Path.remove(path, index, [mut]);
-Path.move(path, from, to, [mut]);
-</code></pre>
+<p>All of these methods return an instance without modifying the original.</p>
+
+<div class="highlight highlight-javascript"><pre><span class="nx">Path</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="nx">path</span><span class="p">,</span> <span class="nx">element</span><span class="p">,</span> <span class="p">[</span><span class="nx">mut</span><span class="p">]);</span>
+<span class="nx">Path</span><span class="p">.</span><span class="nx">prepend</span><span class="p">(</span><span class="nx">path</span><span class="p">,</span> <span class="nx">element</span><span class="p">,</span> <span class="p">[</span><span class="nx">mut</span><span class="p">]);</span>
+<span class="nx">Path</span><span class="p">.</span><span class="nx">update</span><span class="p">(</span><span class="nx">path</span><span class="p">,</span> <span class="nx">index</span><span class="p">,</span> <span class="nx">element</span><span class="p">,</span> <span class="p">[</span><span class="nx">mut</span><span class="p">]);</span>
+<span class="nx">Path</span><span class="p">.</span><span class="nx">remove</span><span class="p">(</span><span class="nx">path</span><span class="p">,</span> <span class="nx">index</span><span class="p">,</span> <span class="p">[</span><span class="nx">mut</span><span class="p">]);</span>
+<span class="nx">Path</span><span class="p">.</span><span class="nx">move</span><span class="p">(</span><span class="nx">path</span><span class="p">,</span> <span class="nx">from</span><span class="p">,</span> <span class="nx">to</span><span class="p">,</span> <span class="p">[</span><span class="nx">mut</span><span class="p">]);</span>
+</pre></div>
 
 <h3>
 <a name="funcarguments-f-return-name" class="anchor" href="#funcarguments-f-return-name"><span class="octicon octicon-link"></span></a>func(Arguments, f, [Return], [name])</h3>
@@ -460,13 +464,13 @@ Path.move(path, from, to, [mut]);
 <code>name</code> optional string useful for debugging</li>
 </ul><p>Example</p>
 
-<pre><code>var sum = func(tuple([Num, Num]), function (a, b) {
-    return a + b;
-}, Num);
+<div class="highlight highlight-javascript"><pre><span class="kd">var</span> <span class="nx">sum</span> <span class="o">=</span> <span class="nx">func</span><span class="p">(</span><span class="nx">tuple</span><span class="p">([</span><span class="nx">Num</span><span class="p">,</span> <span class="nx">Num</span><span class="p">]),</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">a</span> <span class="o">+</span> <span class="nx">b</span><span class="p">;</span>
+<span class="p">},</span> <span class="nx">Num</span><span class="p">);</span>
 
-sum(1, 2); // =&gt; 3
-sum(1, 'a'); // =&gt; fail!
-</code></pre>
+<span class="nx">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span> <span class="c1">// =&gt; 3</span>
+<span class="nx">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">'a'</span><span class="p">);</span> <span class="c1">// =&gt; fail!</span>
+</pre></div>
 
 <h2>
 <a name="todo" class="anchor" href="#todo"><span class="octicon octicon-link"></span></a>TODO</h2>
