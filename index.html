@@ -31,7 +31,7 @@
         <h1>
 <a name="tcomb" class="anchor" href="#tcomb"><span class="octicon octicon-link"></span></a>tcomb</h1>
 
-<p>tcomb is a library which allows you to <strong>check the types</strong> of JavaScript values at runtime with a <strong>simple syntax</strong>. It is great for checking external input, for testing and for adding safety to your internal code. Bonus points: </p>
+<p>tcomb is a library for Node.js and browser which allows you to <strong>check the types</strong> of JavaScript values at runtime with a <strong>simple syntax</strong>. It is great for checking external input, for testing and for adding safety to your internal code. Bonus points: </p>
 
 <ul>
 <li>write complex domain models in a breeze and with small code footprint</li>
@@ -39,7 +39,7 @@
 <li>
 <strong>instances are immutables</strong> by default</li>
 <li>encode/decode of domain objects to/from JSON for free</li>
-<li>make your existing code safer gradually</li>
+<li>gradually make your existing code safer</li>
 </ul><p>The library provides several type combinators and a built-in <code>assert</code> function. When an assertion fails the library <strong>starts the debugger</strong> so you can inspect the stack and quickly find out what's wrong.</p>
 
 <p>You can check:</p>
@@ -125,7 +125,7 @@
 <span class="kd">var</span> <span class="nx">p</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">'a'</span><span class="p">);</span> <span class="c1">// silent error</span>
 </pre></div>
 
-<p>in order to "tcombify" your code you can simply add some assertion</p>
+<p>in order to "tcombify" your code you can simply add some assertions</p>
 
 <div class="highlight highlight-javascript"><pre><span class="kd">function</span> <span class="nx">Point</span> <span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">assert</span><span class="p">(</span><span class="nx">Num</span><span class="p">.</span><span class="nx">is</span><span class="p">(</span><span class="nx">x</span><span class="p">));</span>
@@ -157,9 +157,11 @@ var t = require('tcomb');
 <li><code>Array#some()</code></li>
 <li><code>Array#every()</code></li>
 <li><code>Object#keys()</code></li>
-</ul><p>you can use <code>es5-shim</code> to support old browsers</p>
+<li><code>JSON.stringify()</code></li>
+</ul><p>you can use <code>es5-shim</code> and <code>json2</code> to support old browsers</p>
 
 <div class="highlight highlight-html"><pre><span class="c">&lt;!--[if lt IE 9]&gt;</span>
+<span class="c">&lt;script src="json2.js"&gt;&lt;/script&gt;</span>
 <span class="c">&lt;script src="es5-shim.min.js"&gt;&lt;/script&gt;</span>
 <span class="c">&lt;![endif]--&gt;</span>
 <span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"tcomb.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
@@ -171,12 +173,7 @@ var t = require('tcomb');
 <h2>
 <a name="tests" class="anchor" href="#tests"><span class="octicon octicon-link"></span></a>Tests</h2>
 
-<p>Run</p>
-
-<pre><code>mocha
-</code></pre>
-
-<p>in the project root.</p>
+<p>Run <code>mocha</code> in the project root.</p>
 
 <h2>
 <a name="whats-a-type" class="anchor" href="#whats-a-type"><span class="octicon octicon-link"></span></a>What's a type?</h2>
@@ -185,7 +182,7 @@ var t = require('tcomb');
 
 <ol>
 <li>
-<code>T</code> has signature <code>T(values, [mut])</code> where <code>values</code> depends on the nature of <code>T</code> and the optional boolean arg <code>mut</code> makes the instance mutable (default <code>false</code>)</li>
+<code>T</code> has signature <code>T(values, [mut])</code> where <code>values</code> depends on the nature of <code>T</code> and the optional boolean <code>mut</code> makes the instance mutable (default <code>false</code>)</li>
 <li>
 <code>T</code> is idempotent: <code>new T(new T(values)) "equals" new T(values)</code>
 </li>
@@ -198,7 +195,7 @@ var t = require('tcomb');
 <a name="api" class="anchor" href="#api"><span class="octicon octicon-link"></span></a>Api</h2>
 
 <h3>
-<a name="assertguard-message" class="anchor" href="#assertguard-message"><span class="octicon octicon-link"></span></a>assert(guard, [message]);</h3>
+<a name="assertguard-message-values" class="anchor" href="#assertguard-message-values"><span class="octicon octicon-link"></span></a>assert(guard, [message], [values...]);</h3>
 
 <p>If <code>guard !== true</code> the debugger kicks in.</p>
 
@@ -207,7 +204,32 @@ var t = require('tcomb');
 <code>guard</code> boolean condition</li>
 <li>
 <code>message</code> optional string useful for debugging</li>
-</ul><h3>
+<li>
+<code>values...</code> optional values formatted by <code>message</code> (<a href="https://github.com/visionmedia/debug">visionmedia/debug</a> style)</li>
+</ul><p>Example</p>
+
+<div class="highlight highlight-javascript"><pre><span class="nx">assert</span><span class="p">(</span><span class="mi">1</span> <span class="o">===</span> <span class="mi">2</span><span class="p">);</span> <span class="c1">// =&gt; 'assert(): failed'</span>
+<span class="nx">assert</span><span class="p">(</span><span class="mi">1</span> <span class="o">===</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">'error!'</span><span class="p">);</span> <span class="c1">// =&gt; 'error!'</span>
+<span class="nx">assert</span><span class="p">(</span><span class="mi">1</span> <span class="o">===</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">'error: %s !== %s'</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span> <span class="c1">// =&gt; 'error: 1 !== 2'</span>
+</pre></div>
+
+<p><strong>Customize failure behaviour</strong></p>
+
+<p>In production envs you don't want to leak failures to the user</p>
+
+<div class="highlight highlight-javascript"><pre><span class="c1">// override onfail hook</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">onfail</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">message</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">try</span> <span class="p">{</span>
+        <span class="c1">// capture stack trace</span>
+        <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="nx">message</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// use you favourite JavaScript error logging service</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">stack</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+</pre></div>
+
+<h3>
 <a name="structprops-name" class="anchor" href="#structprops-name"><span class="octicon octicon-link"></span></a>struct(props, [name])</h3>
 
 <p>Defines a struct like type.</p>
@@ -221,7 +243,7 @@ var t = require('tcomb');
 
 <div class="highlight highlight-javascript"><pre><span class="s2">"use strict"</span><span class="p">;</span>
 
-<span class="c1">// define a struct with two numerical props</span>
+<span class="c1">// defines a struct with two numerical props</span>
 <span class="kd">var</span> <span class="nx">Point</span> <span class="o">=</span> <span class="nx">struct</span><span class="p">({</span>
     <span class="nx">x</span><span class="o">:</span> <span class="nx">Num</span><span class="p">,</span>
     <span class="nx">y</span><span class="o">:</span> <span class="nx">Num</span>
@@ -245,7 +267,7 @@ var t = require('tcomb');
 <h4>
 <a name="isx" class="anchor" href="#isx"><span class="octicon octicon-link"></span></a>is(x)</h4>
 
-<p>Returns <code>true</code> if <code>x</code> is an instance of <code>Point</code>.</p>
+<p>Returns <code>true</code> if <code>x</code> is an instance of the struct.</p>
 
 <div class="highlight highlight-javascript"><pre><span class="nx">Point</span><span class="p">.</span><span class="nx">is</span><span class="p">(</span><span class="nx">p</span><span class="p">);</span> <span class="c1">// =&gt; true</span>
 </pre></div>
@@ -261,7 +283,7 @@ var t = require('tcomb');
 <h3>
 <a name="uniontypes-name" class="anchor" href="#uniontypes-name"><span class="octicon octicon-link"></span></a>union(types, [name])</h3>
 
-<p>Defines a types union.</p>
+<p>Defines a union of types.</p>
 
 <ul>
 <li>
@@ -380,7 +402,7 @@ var t = require('tcomb');
 <li>
 <code>type</code> the supertype</li>
 <li>
-<code>predicate</code>: a function with signature <code>(x) -&gt; boolean</code>
+<code>predicate</code> a function with signature <code>(x) -&gt; boolean</code>
 </li>
 <li>
 <code>name</code> optional string useful for debugging</li>
@@ -413,7 +435,7 @@ var t = require('tcomb');
 <h3>
 <a name="listtype-name" class="anchor" href="#listtype-name"><span class="octicon octicon-link"></span></a>list(type, [name])</h3>
 
-<p>Defines an array where all elements are of type <code>type</code>.</p>
+<p>Defines an array where all the elements are of type <code>type</code>.</p>
 
 <ul>
 <li>
@@ -465,7 +487,7 @@ var t = require('tcomb');
 <li>
 <code>f</code> the function to execute</li>
 <li>
-<code>Return</code> optional type of the return value</li>
+<code>Return</code> optional, check the type of the return value</li>
 <li>
 <code>name</code> optional string useful for debugging</li>
 </ul><p>Example</p>
@@ -484,7 +506,13 @@ var t = require('tcomb');
 <ul>
 <li>more tests</li>
 <li>jsDoc comments</li>
+<li>Your ideas?</li>
 </ul><h2>
+<a name="contribution" class="anchor" href="#contribution"><span class="octicon octicon-link"></span></a>Contribution</h2>
+
+<p>If you do have a contribution for the package feel free to put up a Pull Request or open Issue.</p>
+
+<h2>
 <a name="copyright--license" class="anchor" href="#copyright--license"><span class="octicon octicon-link"></span></a>Copyright &amp; License</h2>
 
 <p>Copyright (C) 2014 Giulio Canti - Released under the MIT License.</p>
