@@ -31,24 +31,25 @@
         <h1>
 <a name="tcomb" class="anchor" href="#tcomb"><span class="octicon octicon-link"></span></a>tcomb</h1>
 
-<p>tcomb is a library for Node.js and browser which allows you to <strong>check the types</strong> of JavaScript values at runtime with a <strong>simple syntax</strong>. It is great for checking external input, for testing and for adding safety to your internal code. Bonus points: </p>
+<p>tcomb is a library for Node.js and the browser which allows you to <strong>check the types</strong> of JavaScript values at runtime with a simple syntax. It is great for checking external input, for testing and for <strong>adding safety</strong> to your internal code. </p>
+
+<p>Some features include:</p>
 
 <ul>
-<li>write complex domain models in a breeze and with small code footprint</li>
-<li>easy debugging</li>
 <li>
-<strong>instances are immutables</strong> by default</li>
-<li>encode/decode of domain objects to/from JSON for free</li>
-<li>gradually make your existing code safer</li>
-</ul><p>The library provides several type combinators and a built-in <code>assert</code> function. When an assertion fails the library <strong>starts the debugger</strong> so you can inspect the stack and quickly find out what's wrong.</p>
+<strong>write complex domain models</strong> in a breeze and with small code footprint</li>
+<li>easy debugging</li>
+<li>instances are immutables by default</li>
+<li>encode/decode of domain models to/from JSON for free</li>
+</ul><p>The library provides a built-in <code>assert</code> function, if an assert fails the <strong>debugger kicks in</strong> 
+so you can inspect the stack and quickly find out what's wrong.</p>
 
-<p>You can check:</p>
+<p>You can handle:</p>
+
+<p><strong>JavaScript native types</strong></p>
 
 <ul>
-<li>JavaScript native types
-
-<ul>
-<li>Nil: <code>null</code> and  <code>undefined</code>
+<li>Nil: <code>null</code> and <code>undefined</code>
 </li>
 <li>Str: strings</li>
 <li>Num: numbers</li>
@@ -57,52 +58,45 @@
 <li>Obj: plain objects</li>
 <li>Func: functions</li>
 <li>Err: errors</li>
-</ul>
-</li>
-<li>structs (i.e. classes)</li>
-<li>unions</li>
+</ul><p><strong>type combinators</strong> build new types from those already defined</p>
+
+<ul>
+<li>struct (i.e. classes)</li>
+<li>union</li>
 <li>maybe</li>
 <li>enums</li>
-<li>tuples</li>
-<li>subtypes</li>
-<li>lists</li>
-<li>function types (experimental)</li>
+<li>tuple</li>
+<li>subtype</li>
+<li>list</li>
+<li>function type (experimental)</li>
 </ul><h2>
-<a name="quick-examples" class="anchor" href="#quick-examples"><span class="octicon octicon-link"></span></a>Quick examples</h2>
+<a name="quick-examples" class="anchor" href="#quick-examples"><span class="octicon octicon-link"></span></a>Quick Examples</h2>
 
-<h3>
-<a name="lets-build-a-new-product-model" class="anchor" href="#lets-build-a-new-product-model"><span class="octicon octicon-link"></span></a>Let's build a new product model</h3>
+<p>Let's build a product model</p>
 
-<div class="highlight highlight-javascript"><pre><span class="c1">// a struct</span>
-<span class="kd">var</span> <span class="nx">Product</span> <span class="o">=</span> <span class="nx">struct</span><span class="p">({</span>
+<div class="highlight highlight-javascript"><pre><span class="kd">var</span> <span class="nx">Product</span> <span class="o">=</span> <span class="nx">struct</span><span class="p">({</span>
     <span class="nx">name</span><span class="o">:</span> <span class="nx">Str</span><span class="p">,</span>                  <span class="c1">// required string</span>
-    <span class="nx">description</span><span class="o">:</span> <span class="nx">maybe</span><span class="p">(</span><span class="nx">Str</span><span class="p">),</span>    <span class="c1">// optional string, can be null or undefined</span>
-    <span class="nx">homepage</span><span class="o">:</span> <span class="nx">Url</span><span class="p">,</span>              <span class="c1">// a subtype of a string</span>
+    <span class="nx">desc</span><span class="o">:</span> <span class="nx">maybe</span><span class="p">(</span><span class="nx">Str</span><span class="p">),</span>           <span class="c1">// optional string, can be null</span>
+    <span class="nx">home</span><span class="o">:</span> <span class="nx">Url</span><span class="p">,</span>                  <span class="c1">// a subtype of a string</span>
     <span class="nx">shippings</span><span class="o">:</span> <span class="nx">list</span><span class="p">(</span><span class="nx">Str</span><span class="p">),</span>       <span class="c1">// a list of shipping methods</span>
-    <span class="nx">category</span><span class="o">:</span> <span class="nx">Category</span><span class="p">,</span>         <span class="c1">// an enumeration</span>
-    <span class="nx">price</span><span class="o">:</span> <span class="nx">union</span><span class="p">(</span><span class="nx">Num</span><span class="p">,</span> <span class="nx">Price</span><span class="p">),</span>   <span class="c1">// a price expressed in dollars OR in another currency</span>
-    <span class="nx">dim</span><span class="o">:</span> <span class="nx">tuple</span><span class="p">([</span><span class="nx">Num</span><span class="p">,</span> <span class="nx">Num</span><span class="p">])</span>      <span class="c1">// a tuple (width, height)</span>
+    <span class="nx">category</span><span class="o">:</span> <span class="nx">Category</span><span class="p">,</span>         <span class="c1">// enum, one of [audio, video]</span>
+    <span class="nx">price</span><span class="o">:</span> <span class="nx">union</span><span class="p">(</span><span class="nx">Num</span><span class="p">,</span> <span class="nx">Price</span><span class="p">),</span>   <span class="c1">// a price (dollars) OR in another currency</span>
+    <span class="nx">dim</span><span class="o">:</span> <span class="nx">tuple</span><span class="p">([</span><span class="nx">Num</span><span class="p">,</span> <span class="nx">Num</span><span class="p">])</span>      <span class="c1">// dimensions (width, height)</span>
 <span class="p">});</span>
 
 <span class="kd">var</span> <span class="nx">Url</span> <span class="o">=</span> <span class="nx">subtype</span><span class="p">(</span><span class="nx">Str</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">s</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">return</span> <span class="nx">s</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="s1">'http://'</span><span class="p">)</span> <span class="o">===</span> <span class="mi">0</span><span class="p">;</span>
 <span class="p">});</span>
 
-<span class="kd">var</span> <span class="nx">Category</span> <span class="o">=</span> <span class="nx">enums</span><span class="p">({</span>
-    <span class="nx">audio</span><span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
-    <span class="nx">video</span><span class="o">:</span> <span class="mi">1</span>
-<span class="p">});</span>
+<span class="kd">var</span> <span class="nx">Category</span> <span class="o">=</span> <span class="nx">enums</span><span class="p">({</span> <span class="nx">audio</span><span class="o">:</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">video</span><span class="o">:</span> <span class="mi">1</span> <span class="p">});</span>
 
-<span class="kd">var</span> <span class="nx">Price</span> <span class="o">=</span> <span class="nx">struct</span><span class="p">({</span>
-    <span class="nx">currency</span><span class="o">:</span> <span class="nx">Str</span><span class="p">,</span>
-    <span class="nx">amount</span><span class="o">:</span> <span class="nx">Num</span>
-<span class="p">});</span>
+<span class="kd">var</span> <span class="nx">Price</span> <span class="o">=</span> <span class="nx">struct</span><span class="p">({</span> <span class="nx">currency</span><span class="o">:</span> <span class="nx">Str</span><span class="p">,</span> <span class="nx">amount</span><span class="o">:</span> <span class="nx">Num</span> <span class="p">});</span>
 
 <span class="c1">// JSON of a product</span>
 <span class="kd">var</span> <span class="nx">json</span> <span class="o">=</span> <span class="p">{</span>
     <span class="nx">name</span><span class="o">:</span> <span class="s1">'iPod'</span><span class="p">,</span>
-    <span class="nx">description</span><span class="o">:</span> <span class="s1">'Engineered for maximum funness.'</span><span class="p">,</span>
-    <span class="nx">homepage</span><span class="o">:</span> <span class="s1">'http://www.apple.com/ipod/'</span><span class="p">,</span>
+    <span class="nx">desc</span><span class="o">:</span> <span class="s1">'Engineered for maximum funness.'</span><span class="p">,</span>
+    <span class="nx">home</span><span class="o">:</span> <span class="s1">'http://www.apple.com/ipod/'</span><span class="p">,</span>
     <span class="nx">shippings</span><span class="o">:</span> <span class="p">[</span><span class="s1">'Same Day'</span><span class="p">,</span> <span class="s1">'Next Businness Day'</span><span class="p">],</span>
     <span class="nx">category</span><span class="o">:</span> <span class="s1">'audio'</span><span class="p">,</span>
     <span class="nx">price</span><span class="o">:</span> <span class="p">{</span><span class="nx">currency</span><span class="o">:</span> <span class="s1">'EUR'</span><span class="p">,</span> <span class="nx">amount</span><span class="o">:</span> <span class="mi">100</span><span class="p">},</span>
@@ -113,8 +107,7 @@
 <span class="kd">var</span> <span class="nx">ipod</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Product</span><span class="p">(</span><span class="nx">json</span><span class="p">);</span>
 </pre></div>
 
-<h3>
-<a name="you-have-existing-code-and-you-want-to-add-safety" class="anchor" href="#you-have-existing-code-and-you-want-to-add-safety"><span class="octicon octicon-link"></span></a>You have existing code and you want to add safety</h3>
+<p>You have existing code and you want to add safety</p>
 
 <div class="highlight highlight-javascript"><pre><span class="c1">// your code: plain old JavaScript class</span>
 <span class="kd">function</span> <span class="nx">Point</span> <span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">)</span> <span class="p">{</span>
@@ -125,7 +118,7 @@
 <span class="kd">var</span> <span class="nx">p</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">'a'</span><span class="p">);</span> <span class="c1">// silent error</span>
 </pre></div>
 
-<p>in order to "tcombify" your code you can simply add some assertions</p>
+<p>in order to "tcombify" your code you can simply add some asserts</p>
 
 <div class="highlight highlight-javascript"><pre><span class="kd">function</span> <span class="nx">Point</span> <span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">assert</span><span class="p">(</span><span class="nx">Num</span><span class="p">.</span><span class="nx">is</span><span class="p">(</span><span class="nx">x</span><span class="p">));</span>
@@ -143,11 +136,17 @@
 <p>Node</p>
 
 <pre><code>npm install tcomb
-
-var t = require('tcomb');
 </code></pre>
 
 <p>Browser</p>
+
+<pre><code>bower install tcomb
+</code></pre>
+
+<p>or download the <code>build/tcomb.min.js</code> file.</p>
+
+<h3>
+<a name="requirements" class="anchor" href="#requirements"><span class="octicon octicon-link"></span></a>Requirements</h3>
 
 <p>This library uses a few ES5 methods</p>
 
@@ -173,12 +172,12 @@ var t = require('tcomb');
 <h2>
 <a name="tests" class="anchor" href="#tests"><span class="octicon octicon-link"></span></a>Tests</h2>
 
-<p>Run <code>mocha</code> in the project root.</p>
+<p>Run <code>mocha</code> or <code>npm test</code> in the project root.</p>
 
 <h2>
-<a name="whats-a-type" class="anchor" href="#whats-a-type"><span class="octicon octicon-link"></span></a>What's a type?</h2>
+<a name="the-idea" class="anchor" href="#the-idea"><span class="octicon octicon-link"></span></a>The Idea</h2>
 
-<p>In tcomb a <code>type</code> is a function <code>T</code> such that</p>
+<p>What's a type? In tcomb a <code>type</code> is a function <code>T</code> such that</p>
 
 <ol>
 <li>
@@ -217,8 +216,8 @@ var t = require('tcomb');
 
 <p>In production envs you don't want to leak failures to the user</p>
 
-<div class="highlight highlight-javascript"><pre><span class="c1">// override onfail hook</span>
-<span class="nx">assert</span><span class="p">.</span><span class="nx">onfail</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">message</span><span class="p">)</span> <span class="p">{</span>
+<div class="highlight highlight-javascript"><pre><span class="c1">// override onFail hook</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">onFail</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">message</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">try</span> <span class="p">{</span>
         <span class="c1">// capture stack trace</span>
         <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="nx">message</span><span class="p">);</span>
@@ -357,6 +356,26 @@ var t = require('tcomb');
 <div class="highlight highlight-javascript"><pre><span class="nx">Direction</span><span class="p">.</span><span class="nx">is</span><span class="p">(</span><span class="s1">'North'</span><span class="p">);</span> <span class="c1">// =&gt; true</span>
 </pre></div>
 
+<h4>
+<a name="enumsofkeys-name" class="anchor" href="#enumsofkeys-name"><span class="octicon octicon-link"></span></a>enums.of(keys, [name])</h4>
+
+<p>Returns an enums of an array of keys, useful when you don't mind to define
+custom values form the enums.</p>
+
+<ul>
+<li>
+<code>keys</code> array or string of keys</li>
+<li>
+<code>name</code> optional string useful for debugging</li>
+</ul><p>Example</p>
+
+<div class="highlight highlight-javascript"><pre><span class="c1">// result is the same as the main example</span>
+<span class="kd">var</span> <span class="nx">Direction</span> <span class="o">=</span> <span class="nx">enums</span><span class="p">.</span><span class="nx">of</span><span class="p">([</span><span class="s1">'North'</span><span class="p">,</span> <span class="s1">'East'</span><span class="p">,</span> <span class="s1">'South'</span><span class="p">,</span> <span class="s1">'West'</span><span class="p">]);</span>
+
+<span class="c1">// or..</span>
+<span class="nx">Direction</span> <span class="o">=</span> <span class="nx">enums</span><span class="p">.</span><span class="nx">of</span><span class="p">(</span><span class="s1">'North East South West'</span><span class="p">);</span>
+</pre></div>
+
 <h3>
 <a name="tupletypes-name" class="anchor" href="#tupletypes-name"><span class="octicon octicon-link"></span></a>tuple(types, [name])</h3>
 
@@ -381,7 +400,7 @@ var t = require('tcomb');
 <p>Returns <code>true</code> if <code>x</code> belongs to the tuple.</p>
 
 <div class="highlight highlight-javascript"><pre><span class="nx">Area</span><span class="p">.</span><span class="nx">is</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]);</span>      <span class="c1">// =&gt; true</span>
-<span class="nx">Area</span><span class="p">.</span><span class="nx">is</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="s1">'a'</span><span class="p">]);</span>    <span class="c1">// =&gt; false, second element is not a Num</span>
+<span class="nx">Area</span><span class="p">.</span><span class="nx">is</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="s1">'a'</span><span class="p">]);</span>    <span class="c1">// =&gt; false, the second element is not a Num</span>
 <span class="nx">Area</span><span class="p">.</span><span class="nx">is</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]);</span>   <span class="c1">// =&gt; false, too many elements</span>
 </pre></div>
 
@@ -501,28 +520,54 @@ var t = require('tcomb');
 </pre></div>
 
 <h2>
-<a name="todo" class="anchor" href="#todo"><span class="octicon octicon-link"></span></a>TODO</h2>
+<a name="ideas-and-todo" class="anchor" href="#ideas-and-todo"><span class="octicon octicon-link"></span></a>IDEAS and TODO</h2>
 
 <ul>
-<li>more tests</li>
-<li>jsDoc comments</li>
-<li>Your ideas?</li>
+<li>explore auto generated UI from domain models written with tcomb</li>
+<li>explore auto validation of UI involving domain models written with tcomb</li>
+<li>explore using tcomb with React.js</li>
+<li><strong>Your ideas?</strong></li>
+<li>detailed api docs</li>
 </ul><h2>
 <a name="contribution" class="anchor" href="#contribution"><span class="octicon octicon-link"></span></a>Contribution</h2>
 
-<p>If you do have a contribution for the package feel free to put up a Pull Request or open Issue.</p>
+<p>If you do have a contribution for the package feel free to put up a Pull Request or open an Issue.</p>
 
 <h2>
-<a name="copyright--license" class="anchor" href="#copyright--license"><span class="octicon octicon-link"></span></a>Copyright &amp; License</h2>
+<a name="roadmap" class="anchor" href="#roadmap"><span class="octicon octicon-link"></span></a>Roadmap</h2>
 
-<p>Copyright (C) 2014 Giulio Canti - Released under the MIT License.</p>
+<h3>
+<a name="v009" class="anchor" href="#v009"><span class="octicon octicon-link"></span></a>v0.0.9</h3>
 
-<p>Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:</p>
+<ul>
+<li>grunt build system</li>
+<li>splitted source files</li>
+<li>100% test coverage</li>
+</ul><h2>
+<a name="license-mit" class="anchor" href="#license-mit"><span class="octicon octicon-link"></span></a>License (MIT)</h2>
 
-<p>The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.</p>
+<pre><code>The MIT License (MIT)
 
-<p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p>
+Copyright (c) 2014 Giulio Canti
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+</code></pre>
       </section>
       <footer>
         <p>This project is maintained by <a href="https://github.com/gcanti">gcanti</a></p>
