@@ -58,7 +58,7 @@ so you can inspect the stack and quickly find out what's wrong.</p>
 <li>Obj: plain objects</li>
 <li>Func: functions</li>
 <li>Err: errors</li>
-</ul><p><strong>type combinators</strong> build new types from those already defined</p>
+</ul><p><strong>type combinators</strong> (build new types from those already defined)</p>
 
 <ul>
 <li>struct (i.e. classes)</li>
@@ -177,7 +177,7 @@ so you can inspect the stack and quickly find out what's wrong.</p>
 <h2>
 <a name="the-idea" class="anchor" href="#the-idea"><span class="octicon octicon-link"></span></a>The Idea</h2>
 
-<p>What's a type? In tcomb a <code>type</code> is a function <code>T</code> such that</p>
+<p>What's a type? In tcomb a type is a function <code>T</code> such that</p>
 
 <ol>
 <li>
@@ -202,9 +202,8 @@ so you can inspect the stack and quickly find out what's wrong.</p>
 <li>
 <code>guard</code> boolean condition</li>
 <li>
-<code>message</code> optional string useful for debugging</li>
-<li>
-<code>values...</code> optional values formatted by <code>message</code> (<a href="https://github.com/visionmedia/debug">visionmedia/debug</a> style)</li>
+<code>message</code> optional string useful for debugging, formatted with values like <a href="http://nodejs.org/api/util.html#util_util_format_format">util.format in Node</a>
+</li>
 </ul><p>Example</p>
 
 <div class="highlight highlight-javascript"><pre><span class="nx">assert</span><span class="p">(</span><span class="mi">1</span> <span class="o">===</span> <span class="mi">2</span><span class="p">);</span> <span class="c1">// =&gt; 'assert(): failed'</span>
@@ -212,21 +211,7 @@ so you can inspect the stack and quickly find out what's wrong.</p>
 <span class="nx">assert</span><span class="p">(</span><span class="mi">1</span> <span class="o">===</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">'error: %s !== %s'</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span> <span class="c1">// =&gt; 'error: 1 !== 2'</span>
 </pre></div>
 
-<p><strong>Customize failure behaviour</strong></p>
-
-<p>In production envs you don't want to leak failures to the user</p>
-
-<div class="highlight highlight-javascript"><pre><span class="c1">// override onFail hook</span>
-<span class="nx">assert</span><span class="p">.</span><span class="nx">onFail</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">message</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">try</span> <span class="p">{</span>
-        <span class="c1">// capture stack trace</span>
-        <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="nx">message</span><span class="p">);</span>
-    <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
-        <span class="c1">// use you favourite JavaScript error logging service</span>
-        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">stack</span><span class="p">);</span>
-    <span class="p">}</span>
-<span class="p">};</span>
-</pre></div>
+<p>To customize failure behaviuor, see <code>options.onFail</code>.</p>
 
 <h3>
 <a name="structprops-name" class="anchor" href="#structprops-name"><span class="octicon octicon-link"></span></a>struct(props, [name])</h3>
@@ -269,14 +254,6 @@ so you can inspect the stack and quickly find out what's wrong.</p>
 <p>Returns <code>true</code> if <code>x</code> is an instance of the struct.</p>
 
 <div class="highlight highlight-javascript"><pre><span class="nx">Point</span><span class="p">.</span><span class="nx">is</span><span class="p">(</span><span class="nx">p</span><span class="p">);</span> <span class="c1">// =&gt; true</span>
-</pre></div>
-
-<h4>
-<a name="updateinstance-updates-mut" class="anchor" href="#updateinstance-updates-mut"><span class="octicon octicon-link"></span></a>update(instance, updates, [mut])</h4>
-
-<p>Returns an instance with updated props, without modifying the original.</p>
-
-<div class="highlight highlight-javascript"><pre><span class="nx">Point</span><span class="p">.</span><span class="nx">update</span><span class="p">(</span><span class="nx">p</span><span class="p">,</span> <span class="p">{</span><span class="nx">x</span><span class="o">:</span> <span class="mi">3</span><span class="p">});</span> <span class="c1">// =&gt; new Point({x: 3, y: 2})</span>
 </pre></div>
 
 <h3>
@@ -360,11 +337,11 @@ so you can inspect the stack and quickly find out what's wrong.</p>
 <a name="enumsofkeys-name" class="anchor" href="#enumsofkeys-name"><span class="octicon octicon-link"></span></a>enums.of(keys, [name])</h4>
 
 <p>Returns an enums of an array of keys, useful when you don't mind to define
-custom values form the enums.</p>
+custom values for the enums.</p>
 
 <ul>
 <li>
-<code>keys</code> array or string of keys</li>
+<code>keys</code> array (or string) of keys</li>
 <li>
 <code>name</code> optional string useful for debugging</li>
 </ul><p>Example</p>
@@ -482,18 +459,6 @@ custom values form the enums.</p>
 <span class="nx">Path</span><span class="p">.</span><span class="nx">is</span><span class="p">([</span><span class="nx">p1</span><span class="p">,</span> <span class="nx">p2</span><span class="p">]);</span> <span class="c1">// =&gt; true</span>
 </pre></div>
 
-<h4>
-<a name="useful-methods" class="anchor" href="#useful-methods"><span class="octicon octicon-link"></span></a>Useful methods</h4>
-
-<p>All of these methods return an instance without modifying the original.</p>
-
-<div class="highlight highlight-javascript"><pre><span class="nx">Path</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="nx">path</span><span class="p">,</span> <span class="nx">element</span><span class="p">,</span> <span class="p">[</span><span class="nx">mut</span><span class="p">]);</span>
-<span class="nx">Path</span><span class="p">.</span><span class="nx">prepend</span><span class="p">(</span><span class="nx">path</span><span class="p">,</span> <span class="nx">element</span><span class="p">,</span> <span class="p">[</span><span class="nx">mut</span><span class="p">]);</span>
-<span class="nx">Path</span><span class="p">.</span><span class="nx">update</span><span class="p">(</span><span class="nx">path</span><span class="p">,</span> <span class="nx">index</span><span class="p">,</span> <span class="nx">element</span><span class="p">,</span> <span class="p">[</span><span class="nx">mut</span><span class="p">]);</span>
-<span class="nx">Path</span><span class="p">.</span><span class="nx">remove</span><span class="p">(</span><span class="nx">path</span><span class="p">,</span> <span class="nx">index</span><span class="p">,</span> <span class="p">[</span><span class="nx">mut</span><span class="p">]);</span>
-<span class="nx">Path</span><span class="p">.</span><span class="nx">move</span><span class="p">(</span><span class="nx">path</span><span class="p">,</span> <span class="nx">from</span><span class="p">,</span> <span class="nx">to</span><span class="p">,</span> <span class="p">[</span><span class="nx">mut</span><span class="p">]);</span>
-</pre></div>
-
 <h3>
 <a name="funcarguments-f-return-name" class="anchor" href="#funcarguments-f-return-name"><span class="octicon octicon-link"></span></a>func(Arguments, f, [Return], [name])</h3>
 
@@ -519,31 +484,57 @@ custom values form the enums.</p>
 <span class="nx">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">'a'</span><span class="p">);</span> <span class="c1">// =&gt; fail!</span>
 </pre></div>
 
+<h3>
+<a name="options" class="anchor" href="#options"><span class="octicon octicon-link"></span></a>options</h3>
+
+<h4>
+<a name="function-optionsonfail" class="anchor" href="#function-optionsonfail"><span class="octicon octicon-link"></span></a>function <code>options.onFail</code>
+</h4>
+
+<p>In production envs you don't want to leak failures to the user</p>
+
+<div class="highlight highlight-javascript"><pre><span class="c1">// override onFail hook</span>
+<span class="nx">options</span><span class="p">.</span><span class="nx">onFail</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">message</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">try</span> <span class="p">{</span>
+        <span class="c1">// capture stack trace</span>
+        <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="nx">message</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// use you favourite JavaScript error logging service</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">stack</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+</pre></div>
+
+<h4>
+<a name="function-optionsupdate" class="anchor" href="#function-optionsupdate"><span class="octicon octicon-link"></span></a>function <code>options.update</code>
+</h4>
+
+<p>TODO: better docs</p>
+
+<p>Add to structs, tuples and lists a static method <code>update</code> that returns a new instance
+without modifying the original.</p>
+
+<p>Example</p>
+
+<div class="highlight highlight-javascript"><pre><span class="c1">// see http://facebook.github.io/react/docs/update.html</span>
+<span class="nx">options</span><span class="p">.</span><span class="nx">update</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">addons</span><span class="p">.</span><span class="nx">update</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">p1</span>  <span class="o">=</span> <span class="k">new</span> <span class="nx">Point</span><span class="p">({</span><span class="nx">x</span><span class="o">:</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">y</span><span class="o">:</span> <span class="mi">0</span><span class="p">});</span>
+<span class="kd">var</span> <span class="nx">p2</span> <span class="o">=</span> <span class="nx">Point</span><span class="p">.</span><span class="nx">update</span><span class="p">(</span><span class="nx">p1</span><span class="p">,</span> <span class="p">{</span><span class="nx">x</span><span class="o">:</span> <span class="p">{</span><span class="nx">$set</span><span class="o">:</span> <span class="mi">1</span><span class="p">}});</span> <span class="c1">// =&gt; Point({x: 1, y: 0})</span>
+</pre></div>
+
 <h2>
-<a name="ideas-and-todo" class="anchor" href="#ideas-and-todo"><span class="octicon octicon-link"></span></a>IDEAS and TODO</h2>
+<a name="ideas" class="anchor" href="#ideas"><span class="octicon octicon-link"></span></a>IDEAS</h2>
 
 <ul>
-<li>explore auto generated UI from domain models written with tcomb</li>
+<li>explore generating UI based on domain models written with tcomb</li>
 <li>explore auto validation of UI involving domain models written with tcomb</li>
 <li>explore using tcomb with React.js</li>
-<li><strong>Your ideas?</strong></li>
-<li>detailed api docs</li>
 </ul><h2>
 <a name="contribution" class="anchor" href="#contribution"><span class="octicon octicon-link"></span></a>Contribution</h2>
 
 <p>If you do have a contribution for the package feel free to put up a Pull Request or open an Issue.</p>
 
 <h2>
-<a name="roadmap" class="anchor" href="#roadmap"><span class="octicon octicon-link"></span></a>Roadmap</h2>
-
-<h3>
-<a name="v009" class="anchor" href="#v009"><span class="octicon octicon-link"></span></a>v0.0.9</h3>
-
-<ul>
-<li>grunt build system</li>
-<li>splitted source files</li>
-<li>100% test coverage</li>
-</ul><h2>
 <a name="license-mit" class="anchor" href="#license-mit"><span class="octicon octicon-link"></span></a>License (MIT)</h2>
 
 <pre><code>The MIT License (MIT)
