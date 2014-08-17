@@ -58,6 +58,9 @@ so you can inspect the stack and quickly find out what's wrong.</p>
 <li>Obj: plain objects</li>
 <li>Func: functions</li>
 <li>Err: errors</li>
+<li>Re: regular expressions</li>
+<li>Dat: dates</li>
+<li>Any: *</li>
 </ul><p><strong>type combinators</strong> (build new types from those already defined)</p>
 
 <ul>
@@ -103,8 +106,8 @@ so you can inspect the stack and quickly find out what's wrong.</p>
     <span class="nx">dim</span><span class="o">:</span> <span class="p">[</span><span class="mf">2.4</span><span class="p">,</span> <span class="mf">4.1</span><span class="p">]</span>
 <span class="p">};</span>
 
-<span class="c1">// get an immutable instance</span>
-<span class="kd">var</span> <span class="nx">ipod</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Product</span><span class="p">(</span><span class="nx">json</span><span class="p">);</span>
+<span class="c1">// get an immutable instance, `new` is optional</span>
+<span class="kd">var</span> <span class="nx">ipod</span> <span class="o">=</span> <span class="nx">Product</span><span class="p">(</span><span class="nx">json</span><span class="p">);</span>
 </pre></div>
 
 <p>You have existing code and you want to add safety</p>
@@ -151,17 +154,19 @@ so you can inspect the stack and quickly find out what's wrong.</p>
 <p>This library uses a few ES5 methods</p>
 
 <ul>
-<li><code>Array#forEach()</code></li>
-<li><code>Array#map()</code></li>
-<li><code>Array#some()</code></li>
-<li><code>Array#every()</code></li>
-<li><code>Object#keys()</code></li>
+<li><code>Array.forEach()</code></li>
+<li><code>Array.map()</code></li>
+<li><code>Array.some()</code></li>
+<li><code>Array.every()</code></li>
+<li><code>Object.keys()</code></li>
+<li><code>Object.freeze()</code></li>
 <li><code>JSON.stringify()</code></li>
-</ul><p>you can use <code>es5-shim</code> and <code>json2</code> to support old browsers</p>
+</ul><p>you can use <code>es5-shim</code>, <code>es5-sham</code> and <code>json2</code> to support old browsers</p>
 
 <div class="highlight highlight-html"><pre><span class="c">&lt;!--[if lt IE 9]&gt;</span>
 <span class="c">&lt;script src="json2.js"&gt;&lt;/script&gt;</span>
 <span class="c">&lt;script src="es5-shim.min.js"&gt;&lt;/script&gt;</span>
+<span class="c">&lt;script src="es5-sham.min.js"&gt;&lt;/script&gt;</span>
 <span class="c">&lt;![endif]--&gt;</span>
 <span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"tcomb.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
 <span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span><span class="nt">&gt;</span>
@@ -181,9 +186,9 @@ so you can inspect the stack and quickly find out what's wrong.</p>
 
 <ol>
 <li>
-<code>T</code> has signature <code>T(values, [mut])</code> where <code>values</code> depends on the nature of <code>T</code> and the optional boolean <code>mut</code> makes the instance mutable (default <code>false</code>)</li>
+<code>T</code> has signature <code>T(value, [mut])</code> where <code>value</code> depends on the nature of <code>T</code> and the optional boolean <code>mut</code> makes the instance mutable (default <code>false</code>)</li>
 <li>
-<code>T</code> is idempotent: <code>new T(new T(values)) "equals" new T(values)</code>
+<code>T</code> is idempotent: <code>T(T(value, mut), mut) === T(value, mut)</code>
 </li>
 <li>
 <code>T</code> owns a static function <code>T.is(x)</code> returning <code>true</code> if <code>x</code> is a instance of <code>T</code>
@@ -194,6 +199,44 @@ so you can inspect the stack and quickly find out what's wrong.</p>
 <a name="api" class="anchor" href="#api"><span class="octicon octicon-link"></span></a>Api</h2>
 
 <h3>
+<a name="options" class="anchor" href="#options"><span class="octicon octicon-link"></span></a>options</h3>
+
+<h4>
+<a name="function-optionsonfail" class="anchor" href="#function-optionsonfail"><span class="octicon octicon-link"></span></a>function <code>options.onFail</code>
+</h4>
+
+<p>In production envs you don't want to leak failures to the user</p>
+
+<div class="highlight highlight-javascript"><pre><span class="c1">// override onFail hook</span>
+<span class="nx">options</span><span class="p">.</span><span class="nx">onFail</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">message</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">try</span> <span class="p">{</span>
+        <span class="c1">// capture stack trace</span>
+        <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="nx">message</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// use you favourite JavaScript error logging service</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">stack</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+</pre></div>
+
+<h4>
+<a name="function-optionsupdate" class="anchor" href="#function-optionsupdate"><span class="octicon octicon-link"></span></a>function <code>options.update</code>
+</h4>
+
+<p>TODO: better docs</p>
+
+<p>Adds to structs, tuples and lists a static method <code>update</code> that returns a new instance
+without modifying the original.</p>
+
+<p>Example</p>
+
+<div class="highlight highlight-javascript"><pre><span class="c1">// see http://facebook.github.io/react/docs/update.html</span>
+<span class="nx">options</span><span class="p">.</span><span class="nx">update</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">addons</span><span class="p">.</span><span class="nx">update</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">p1</span>  <span class="o">=</span> <span class="nx">Point</span><span class="p">({</span><span class="nx">x</span><span class="o">:</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">y</span><span class="o">:</span> <span class="mi">0</span><span class="p">});</span>
+<span class="kd">var</span> <span class="nx">p2</span> <span class="o">=</span> <span class="nx">Point</span><span class="p">.</span><span class="nx">update</span><span class="p">(</span><span class="nx">p1</span><span class="p">,</span> <span class="p">{</span><span class="nx">x</span><span class="o">:</span> <span class="p">{</span><span class="nx">$set</span><span class="o">:</span> <span class="mi">1</span><span class="p">}});</span> <span class="c1">// =&gt; Point({x: 1, y: 0})</span>
+</pre></div>
+
+<h3>
 <a name="assertguard-message-values" class="anchor" href="#assertguard-message-values"><span class="octicon octicon-link"></span></a>assert(guard, [message], [values...]);</h3>
 
 <p>If <code>guard !== true</code> the debugger kicks in.</p>
@@ -202,16 +245,15 @@ so you can inspect the stack and quickly find out what's wrong.</p>
 <li>
 <code>guard</code> boolean condition</li>
 <li>
-<code>message</code> optional string useful for debugging, formatted with values like <a href="http://nodejs.org/api/util.html#util_util_format_format">util.format in Node</a>
-</li>
+<code>message</code> optional string useful for debugging, formatted with values like [util.format in Node][<a href="http://nodejs.org/api/util.html#util_util_format_format">http://nodejs.org/api/util.html#util_util_format_format</a>]</li>
 </ul><p>Example</p>
 
-<div class="highlight highlight-javascript"><pre><span class="nx">assert</span><span class="p">(</span><span class="mi">1</span> <span class="o">===</span> <span class="mi">2</span><span class="p">);</span> <span class="c1">// =&gt; 'assert(): failed'</span>
-<span class="nx">assert</span><span class="p">(</span><span class="mi">1</span> <span class="o">===</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">'error!'</span><span class="p">);</span> <span class="c1">// =&gt; 'error!'</span>
-<span class="nx">assert</span><span class="p">(</span><span class="mi">1</span> <span class="o">===</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">'error: %s !== %s'</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span> <span class="c1">// =&gt; 'error: 1 !== 2'</span>
+<div class="highlight highlight-javascript"><pre><span class="nx">assert</span><span class="p">(</span><span class="mi">1</span> <span class="o">===</span> <span class="mi">2</span><span class="p">);</span> <span class="c1">// throws 'assert(): failed'</span>
+<span class="nx">assert</span><span class="p">(</span><span class="mi">1</span> <span class="o">===</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">'error!'</span><span class="p">);</span> <span class="c1">// throws 'error!'</span>
+<span class="nx">assert</span><span class="p">(</span><span class="mi">1</span> <span class="o">===</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">'error: %s !== %s'</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span> <span class="c1">// throws 'error: 1 !== 2'</span>
 </pre></div>
 
-<p>To customize failure behaviuor, see <code>options.onFail</code>.</p>
+<p>To customize failure behaviour, see <code>options.onFail</code>.</p>
 
 <h3>
 <a name="structprops-name" class="anchor" href="#structprops-name"><span class="octicon octicon-link"></span></a>struct(props, [name])</h3>
@@ -239,11 +281,11 @@ so you can inspect the stack and quickly find out what's wrong.</p>
 <span class="p">};</span>
 
 <span class="c1">// costructor usage, p is immutable</span>
-<span class="kd">var</span> <span class="nx">p</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Point</span><span class="p">({</span><span class="nx">x</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">y</span><span class="o">:</span> <span class="mi">2</span><span class="p">});</span>
+<span class="kd">var</span> <span class="nx">p</span> <span class="o">=</span> <span class="nx">Point</span><span class="p">({</span><span class="nx">x</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">y</span><span class="o">:</span> <span class="mi">2</span><span class="p">});</span>
 
 <span class="nx">p</span><span class="p">.</span><span class="nx">x</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span> <span class="c1">// =&gt; TypeError</span>
 
-<span class="nx">p</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Point</span><span class="p">({</span><span class="nx">x</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">y</span><span class="o">:</span> <span class="mi">2</span><span class="p">},</span> <span class="kc">true</span><span class="p">);</span> <span class="c1">// now p is mutable</span>
+<span class="nx">p</span> <span class="o">=</span> <span class="nx">Point</span><span class="p">({</span><span class="nx">x</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">y</span><span class="o">:</span> <span class="mi">2</span><span class="p">},</span> <span class="kc">true</span><span class="p">);</span> <span class="c1">// now p is mutable</span>
 
 <span class="nx">p</span><span class="p">.</span><span class="nx">x</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span> <span class="c1">// ok</span>
 </pre></div>
@@ -257,13 +299,13 @@ so you can inspect the stack and quickly find out what's wrong.</p>
 </pre></div>
 
 <h3>
-<a name="uniontypes-name" class="anchor" href="#uniontypes-name"><span class="octicon octicon-link"></span></a>union(types, [name])</h3>
+<a name="unionts-name" class="anchor" href="#unionts-name"><span class="octicon octicon-link"></span></a>union(Ts, [name])</h3>
 
 <p>Defines a union of types.</p>
 
 <ul>
 <li>
-<code>types</code> array of types</li>
+<code>Ts</code> array of types</li>
 <li>
 <code>name</code> optional string useful for debugging</li>
 </ul><p>Example</p>
@@ -289,13 +331,13 @@ so you can inspect the stack and quickly find out what's wrong.</p>
 
 <p>Returns <code>true</code> if <code>x</code> belongs to the union.</p>
 
-<div class="highlight highlight-javascript"><pre><span class="nx">Shape</span><span class="p">.</span><span class="nx">is</span><span class="p">(</span><span class="k">new</span> <span class="nx">Circle</span><span class="p">({</span><span class="nx">center</span><span class="o">:</span> <span class="nx">p</span><span class="p">,</span> <span class="nx">radius</span><span class="o">:</span> <span class="mi">10</span><span class="p">}));</span> <span class="c1">// =&gt; true</span>
+<div class="highlight highlight-javascript"><pre><span class="nx">Shape</span><span class="p">.</span><span class="nx">is</span><span class="p">(</span><span class="nx">Circle</span><span class="p">({</span><span class="nx">center</span><span class="o">:</span> <span class="nx">p</span><span class="p">,</span> <span class="nx">radius</span><span class="o">:</span> <span class="mi">10</span><span class="p">}));</span> <span class="c1">// =&gt; true</span>
 </pre></div>
 
 <h3>
-<a name="maybetype-name" class="anchor" href="#maybetype-name"><span class="octicon octicon-link"></span></a>maybe(type, [name])</h3>
+<a name="maybet-name" class="anchor" href="#maybet-name"><span class="octicon octicon-link"></span></a>maybe(T, [name])</h3>
 
-<p>Same as <code>union([Nil, type])</code>.</p>
+<p>Same as <code>union([Nil, T])</code>.</p>
 
 <div class="highlight highlight-javascript"><pre><span class="c1">// the value of a radio input where null = no selection</span>
 <span class="kd">var</span> <span class="nx">Radio</span> <span class="o">=</span> <span class="nx">maybe</span><span class="p">(</span><span class="nx">Str</span><span class="p">);</span>
@@ -354,13 +396,13 @@ custom values for the enums.</p>
 </pre></div>
 
 <h3>
-<a name="tupletypes-name" class="anchor" href="#tupletypes-name"><span class="octicon octicon-link"></span></a>tuple(types, [name])</h3>
+<a name="tuplets-name" class="anchor" href="#tuplets-name"><span class="octicon octicon-link"></span></a>tuple(Ts, [name])</h3>
 
 <p>Defines a tuple whose coordinates have the specified types.</p>
 
 <ul>
 <li>
-<code>types</code> array of coordinates types</li>
+<code>Ts</code> array of coordinates types</li>
 <li>
 <code>name</code> optional string useful for debugging</li>
 </ul><p>Example</p>
@@ -368,7 +410,7 @@ custom values for the enums.</p>
 <div class="highlight highlight-javascript"><pre><span class="kd">var</span> <span class="nx">Area</span> <span class="o">=</span> <span class="nx">tuple</span><span class="p">([</span><span class="nx">Num</span><span class="p">,</span> <span class="nx">Num</span><span class="p">]);</span>
 
 <span class="c1">// constructor usage, area is immutable</span>
-<span class="kd">var</span> <span class="nx">area</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Area</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]);</span>
+<span class="kd">var</span> <span class="nx">area</span> <span class="o">=</span> <span class="nx">Area</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]);</span>
 </pre></div>
 
 <h4>
@@ -381,22 +423,14 @@ custom values for the enums.</p>
 <span class="nx">Area</span><span class="p">.</span><span class="nx">is</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]);</span>   <span class="c1">// =&gt; false, too many elements</span>
 </pre></div>
 
-<h4>
-<a name="updateinstance-index-element-mut" class="anchor" href="#updateinstance-index-element-mut"><span class="octicon octicon-link"></span></a>update(instance, index, element, [mut])</h4>
-
-<p>Returns an instance without modifying the original.</p>
-
-<div class="highlight highlight-javascript"><pre><span class="nx">Area</span><span class="p">.</span><span class="nx">update</span><span class="p">(</span><span class="nx">area</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>    <span class="c1">// =&gt; [2, 2]</span>
-</pre></div>
-
 <h3>
-<a name="subtypetype-predicate-name" class="anchor" href="#subtypetype-predicate-name"><span class="octicon octicon-link"></span></a>subtype(type, predicate, [name])</h3>
+<a name="subtypet-predicate-name" class="anchor" href="#subtypet-predicate-name"><span class="octicon octicon-link"></span></a>subtype(T, predicate, [name])</h3>
 
 <p>Defines a subtype of an existing type.</p>
 
 <ul>
 <li>
-<code>type</code> the supertype</li>
+<code>T</code> the supertype</li>
 <li>
 <code>predicate</code> a function with signature <code>(x) -&gt; boolean</code>
 </li>
@@ -410,9 +444,9 @@ custom values for the enums.</p>
 <span class="p">});</span>
 
 <span class="c1">// costructor usage, p is immutable</span>
-<span class="kd">var</span> <span class="nx">p</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Q1Point</span><span class="p">({</span><span class="nx">x</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">y</span><span class="o">:</span> <span class="mi">2</span><span class="p">});</span>
+<span class="kd">var</span> <span class="nx">p</span> <span class="o">=</span> <span class="nx">Q1Point</span><span class="p">({</span><span class="nx">x</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">y</span><span class="o">:</span> <span class="mi">2</span><span class="p">});</span>
 
-<span class="nx">p</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Q1Point</span><span class="p">({</span><span class="nx">x</span><span class="o">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nx">y</span><span class="o">:</span> <span class="o">-</span><span class="mi">2</span><span class="p">});</span> <span class="c1">// =&gt; fail!</span>
+<span class="nx">p</span> <span class="o">=</span> <span class="nx">Q1Point</span><span class="p">({</span><span class="nx">x</span><span class="o">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nx">y</span><span class="o">:</span> <span class="o">-</span><span class="mi">2</span><span class="p">});</span> <span class="c1">// =&gt; fail!</span>
 </pre></div>
 
 <h4>
@@ -429,13 +463,13 @@ custom values for the enums.</p>
 </pre></div>
 
 <h3>
-<a name="listtype-name" class="anchor" href="#listtype-name"><span class="octicon octicon-link"></span></a>list(type, [name])</h3>
+<a name="listt-name" class="anchor" href="#listt-name"><span class="octicon octicon-link"></span></a>list(T, [name])</h3>
 
-<p>Defines an array where all the elements are of type <code>type</code>.</p>
+<p>Defines an array where all the elements are of type <code>T</code>.</p>
 
 <ul>
 <li>
-<code>type</code> type of all the elements</li>
+<code>T</code> type of all the elements</li>
 <li>
 <code>name</code> optional string useful for debugging</li>
 </ul><p>Example</p>
@@ -443,7 +477,7 @@ custom values for the enums.</p>
 <div class="highlight highlight-javascript"><pre><span class="kd">var</span> <span class="nx">Path</span> <span class="o">=</span> <span class="nx">list</span><span class="p">(</span><span class="nx">Point</span><span class="p">);</span>
 
 <span class="c1">// costructor usage, path is immutable</span>
-<span class="kd">var</span> <span class="nx">path</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Path</span><span class="p">([</span>
+<span class="kd">var</span> <span class="nx">path</span> <span class="o">=</span> <span class="nx">Path</span><span class="p">([</span>
     <span class="p">{</span><span class="nx">x</span><span class="o">:</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">y</span><span class="o">:</span> <span class="mi">0</span><span class="p">},</span> 
     <span class="p">{</span><span class="nx">x</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">y</span><span class="o">:</span> <span class="mi">1</span><span class="p">}</span>
 <span class="p">]);</span>
@@ -454,8 +488,8 @@ custom values for the enums.</p>
 
 <p>Returns <code>true</code> if <code>x</code> belongs to the list.</p>
 
-<div class="highlight highlight-javascript"><pre><span class="kd">var</span> <span class="nx">p1</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Point</span><span class="p">({</span><span class="nx">x</span><span class="o">:</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">y</span><span class="o">:</span> <span class="mi">0</span><span class="p">});</span>
-<span class="kd">var</span> <span class="nx">p2</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Point</span><span class="p">({</span><span class="nx">x</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">y</span><span class="o">:</span> <span class="mi">2</span><span class="p">});</span>
+<div class="highlight highlight-javascript"><pre><span class="kd">var</span> <span class="nx">p1</span> <span class="o">=</span> <span class="nx">Point</span><span class="p">({</span><span class="nx">x</span><span class="o">:</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">y</span><span class="o">:</span> <span class="mi">0</span><span class="p">});</span>
+<span class="kd">var</span> <span class="nx">p2</span> <span class="o">=</span> <span class="nx">Point</span><span class="p">({</span><span class="nx">x</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">y</span><span class="o">:</span> <span class="mi">2</span><span class="p">});</span>
 <span class="nx">Path</span><span class="p">.</span><span class="nx">is</span><span class="p">([</span><span class="nx">p1</span><span class="p">,</span> <span class="nx">p2</span><span class="p">]);</span> <span class="c1">// =&gt; true</span>
 </pre></div>
 
@@ -484,44 +518,6 @@ custom values for the enums.</p>
 <span class="nx">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">'a'</span><span class="p">);</span> <span class="c1">// =&gt; fail!</span>
 </pre></div>
 
-<h3>
-<a name="options" class="anchor" href="#options"><span class="octicon octicon-link"></span></a>options</h3>
-
-<h4>
-<a name="function-optionsonfail" class="anchor" href="#function-optionsonfail"><span class="octicon octicon-link"></span></a>function <code>options.onFail</code>
-</h4>
-
-<p>In production envs you don't want to leak failures to the user</p>
-
-<div class="highlight highlight-javascript"><pre><span class="c1">// override onFail hook</span>
-<span class="nx">options</span><span class="p">.</span><span class="nx">onFail</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">message</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">try</span> <span class="p">{</span>
-        <span class="c1">// capture stack trace</span>
-        <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="nx">message</span><span class="p">);</span>
-    <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
-        <span class="c1">// use you favourite JavaScript error logging service</span>
-        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">stack</span><span class="p">);</span>
-    <span class="p">}</span>
-<span class="p">};</span>
-</pre></div>
-
-<h4>
-<a name="function-optionsupdate" class="anchor" href="#function-optionsupdate"><span class="octicon octicon-link"></span></a>function <code>options.update</code>
-</h4>
-
-<p>TODO: better docs</p>
-
-<p>Add to structs, tuples and lists a static method <code>update</code> that returns a new instance
-without modifying the original.</p>
-
-<p>Example</p>
-
-<div class="highlight highlight-javascript"><pre><span class="c1">// see http://facebook.github.io/react/docs/update.html</span>
-<span class="nx">options</span><span class="p">.</span><span class="nx">update</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">addons</span><span class="p">.</span><span class="nx">update</span><span class="p">;</span>
-<span class="kd">var</span> <span class="nx">p1</span>  <span class="o">=</span> <span class="k">new</span> <span class="nx">Point</span><span class="p">({</span><span class="nx">x</span><span class="o">:</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">y</span><span class="o">:</span> <span class="mi">0</span><span class="p">});</span>
-<span class="kd">var</span> <span class="nx">p2</span> <span class="o">=</span> <span class="nx">Point</span><span class="p">.</span><span class="nx">update</span><span class="p">(</span><span class="nx">p1</span><span class="p">,</span> <span class="p">{</span><span class="nx">x</span><span class="o">:</span> <span class="p">{</span><span class="nx">$set</span><span class="o">:</span> <span class="mi">1</span><span class="p">}});</span> <span class="c1">// =&gt; Point({x: 1, y: 0})</span>
-</pre></div>
-
 <h2>
 <a name="ideas" class="anchor" href="#ideas"><span class="octicon octicon-link"></span></a>IDEAS</h2>
 
@@ -537,28 +533,27 @@ without modifying the original.</p>
 <h2>
 <a name="license-mit" class="anchor" href="#license-mit"><span class="octicon octicon-link"></span></a>License (MIT)</h2>
 
-<pre><code>The MIT License (MIT)
+<p>The MIT License (MIT)</p>
 
-Copyright (c) 2014 Giulio Canti
+<p>Copyright (c) 2014 Giulio Canti</p>
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
+<p>Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+furnished to do so, subject to the following conditions:</p>
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+<p>The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.</p>
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+<p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-</code></pre>
+SOFTWARE.</p>
       </section>
       <footer>
         <p>This project is maintained by <a href="https://github.com/gcanti">gcanti</a></p>
